@@ -1,0 +1,7 @@
+[package]
+name = "wavelet-trie"
+version = "0.1.0"
+authors = ["Gerald Haesendonck <gerald.haesendonck@ugent.be>"]
+
+[dependencies]
+bit-vec = "0.4"
