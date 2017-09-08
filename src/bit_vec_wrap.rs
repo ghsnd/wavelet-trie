@@ -36,9 +36,14 @@ impl BitVecWrap {
 		self.bit_vec.set(i, elem);
 	}
 
-	// push a bit at the end
+	// add a bit at the end
 	pub fn push(&mut self, elem: bool) {
 		self.bit_vec.push(elem);
+	}
+
+	// remove the last bit and returns it. Returns None if the bitvector is empty.
+	pub fn pop(&mut self) -> Option<bool> {
+		self.bit_vec.pop()
 	}
 
 	// insert a bit at index i, hereby shifting the bits after i one position towards the end
@@ -52,6 +57,18 @@ impl BitVecWrap {
 			}
 		}
 		self.bit_vec.set(i, elem);
+	}
+
+	// delete a bit at index i, hereby shifting the bits after i one position towards the beginning
+	// OPTIMIZEME
+	pub fn delete(&mut self, i: usize) {
+		for index in (i + 1)..self.bit_vec.len() {
+			let next_bit = self.bit_vec.get(index);
+			if let Some(bit) = next_bit {
+				self.bit_vec.set(index - 1, bit);
+			}
+		}
+		self.bit_vec.pop();
 	}
 
 	// Number of ones in the vector before position "pos"
@@ -133,5 +150,16 @@ mod tests {
 		assert_eq!(false, bv.get(0).unwrap());
 		assert_eq!(true, bv.get(1).unwrap());
 		assert_eq!(false, bv.get(2).unwrap());
+	}
+
+	#[test]
+	fn delete() {
+		let mut bv = BitVecWrap::new();
+		bv.push(true);
+		bv.push(false);
+		bv.push(true);
+		bv.delete(1);
+		assert_eq!(true, bv.get(0).unwrap());
+		assert_eq!(true, bv.get(1).unwrap());
 	}
 }
