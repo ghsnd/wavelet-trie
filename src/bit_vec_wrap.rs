@@ -2,12 +2,13 @@ extern crate bit_vec;
 use self::bit_vec::BitVec;
 
 // This is a wrapper around BitVec to implement methods not supported
-// directly by this library, in a very naive way.
+// directly by the bit_vec crate, in a very naive way.
 // TODO In the ideal case, this is replaced by a
 // "dynamic bitvector with indels", i.e. bits can be inserted or deleted
 // at arbitrary points in the vector. It can even be compressed! See
 // V. Mäkinen and G. Navarro. Dynamic entropy-compressed sequences and full-text indexes.
 
+#[derive(Clone, PartialEq, Debug)]
 pub struct BitVecWrap {
 	bit_vec: BitVec,
 }
@@ -21,9 +22,17 @@ impl BitVecWrap {
 		}
 	}
 
+	// constructor
 	pub fn from_elem(nbits: usize, bit: bool) -> Self {
 		BitVecWrap {
 			bit_vec: BitVec::from_elem(nbits, bit)
+		}
+	}
+
+	// constructor
+	pub fn from_bytes(bytes: &[u8]) -> Self {
+		BitVecWrap {
+			bit_vec: BitVec::from_bytes(bytes)
 		}
 	}
 
@@ -58,6 +67,10 @@ impl BitVecWrap {
 		}
 		self.bit_vec.set(i, elem);
 	}
+
+	/*pub fn insert(&mut self, i: usize, other: &BitVecWrap) {
+		
+	}*/
 
 	// delete a bit at index i, hereby shifting the bits after i one position towards the beginning
 	// OPTIMIZEME
@@ -100,6 +113,41 @@ impl BitVecWrap {
 			pos
 		} else {
 			pos - self.rank_one(pos)
+		}
+	}
+
+	pub fn is_empty(&self) -> bool {
+		self.bit_vec.is_empty()
+	}
+
+	pub fn len(&self) -> usize {
+		self.bit_vec.len()
+	}
+
+	pub fn longest_common_prefix (&self, other: &BitVecWrap) -> BitVecWrap {
+		if self.eq(other) {
+			let mut bit_vec_clone = self.clone();
+			bit_vec_clone.pop();
+			bit_vec_clone.pop();
+			bit_vec_clone
+		} else {
+			// OPTIMIZEME
+			let mut new_bit_vec = BitVecWrap::new();
+			let mut done = false;
+			let mut index = 0;
+			while index < self.len() && index < other.len() && !done {
+				if let Some(bit_one) = self.get(index) {
+					if let Some(bit_two) = other.get(index) {
+						if bit_one == bit_two {
+							new_bit_vec.push(bit_one);
+						} else {
+							done = true;
+						}
+					}
+				}
+				index = index + 1;
+			}
+			new_bit_vec
 		}
 	}
 
@@ -161,5 +209,29 @@ mod tests {
 		bv.delete(1);
 		assert_eq!(true, bv.get(0).unwrap());
 		assert_eq!(true, bv.get(1).unwrap());
+	}
+
+	#[test]
+	fn longest_common_prefix_equal() {
+		let bv1 = BitVecWrap::from_bytes(&[0b01010101]);
+		let bv2 = BitVecWrap::from_bytes(&[0b01010101]);
+		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
+		let mut should_be_prefix = BitVecWrap::from_bytes(&[0b01010101]);
+		should_be_prefix.pop();
+		should_be_prefix.pop();
+		assert_eq!(should_be_prefix, longest_common_prefix);
+	}
+
+		#[test]
+	fn longest_common_prefix_different() {
+		let bv1 = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
+		let bv2 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101, 0b00011101]);
+		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
+		let mut should_be_prefix = BitVecWrap::from_bytes(&[0b01010101, 0b01011101]);
+		should_be_prefix.pop();
+		should_be_prefix.pop();
+		should_be_prefix.pop();
+		should_be_prefix.pop();
+		assert_eq!(should_be_prefix, longest_common_prefix);
 	}
 }
