@@ -32,10 +32,7 @@ impl WaveletTrie {
 			// if this node is completely empty, just insert the value. The index is automatically equal to 0
 			self.prefix = value.clone();
 		} else {
-			// if prefix == value:
-			//   longest common prefix = prefix[0..prefix.len() -2[
-			// else
-			//   trivial
+			let common_prefix = self.prefix.longest_common_prefix(&value);
 		}
 	}
 }

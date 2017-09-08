@@ -124,6 +124,10 @@ impl BitVecWrap {
 		self.bit_vec.len()
 	}
 
+	// get the <common prefix> part of <common prefix><different bit><different suffix>
+	// as defined in
+	// R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
+	// which is not what one might expect in the case of equal bitvectors!
 	pub fn longest_common_prefix (&self, other: &BitVecWrap) -> BitVecWrap {
 		if self.eq(other) {
 			let mut bit_vec_clone = self.clone();
@@ -222,7 +226,7 @@ mod tests {
 		assert_eq!(should_be_prefix, longest_common_prefix);
 	}
 
-		#[test]
+	#[test]
 	fn longest_common_prefix_different() {
 		let bv1 = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
 		let bv2 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101, 0b00011101]);
@@ -234,4 +238,13 @@ mod tests {
 		should_be_prefix.pop();
 		assert_eq!(should_be_prefix, longest_common_prefix);
 	}
+
+	#[test]
+	fn longest_common_prefix_empty() {
+		let bv1 = BitVecWrap::new();
+		let bv2 = BitVecWrap::from_bytes(&[0b01010101]);
+		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
+		assert_eq!(0, longest_common_prefix.len());
+	}
+
 }
