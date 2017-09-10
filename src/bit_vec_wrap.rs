@@ -124,6 +124,10 @@ impl BitVecWrap {
 		self.bit_vec.len()
 	}
 
+	pub fn truncate(&mut self, len: usize) {
+		self.bit_vec.truncate(len);
+	}
+
 	// get the <common prefix> part of <common prefix><different bit><different suffix>
 	// as defined in
 	// R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
@@ -131,8 +135,9 @@ impl BitVecWrap {
 	pub fn longest_common_prefix (&self, other: &BitVecWrap) -> BitVecWrap {
 		if self.eq(other) {
 			let mut bit_vec_clone = self.clone();
-			bit_vec_clone.pop();
-			bit_vec_clone.pop();
+			//bit_vec_clone.pop();
+			//bit_vec_clone.pop();
+			bit_vec_clone.truncate(self.len() - 2);
 			bit_vec_clone
 		} else {
 			// OPTIMIZEME
@@ -153,6 +158,12 @@ impl BitVecWrap {
 			}
 			new_bit_vec
 		}
+	}
+
+	pub fn minus_longest_common_prefix(&mut self, lcp: &BitVecWrap) -> bool {
+		let first_bit = self.get(lcp.len()).unwrap();
+		self.bit_vec = self.bit_vec.iter().skip(lcp.len() + 1).collect();
+		first_bit
 	}
 
 }
@@ -247,4 +258,17 @@ mod tests {
 		assert_eq!(0, longest_common_prefix.len());
 	}
 
+	#[test]
+	fn minus_longest_common_prefix() {
+		let bv1     = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
+		let mut bv2 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101, 0b00011101]);
+		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
+		let mut should_be_prefix = BitVecWrap::from_bytes(&[0b10100011]);
+		should_be_prefix.push(true);
+		should_be_prefix.push(false);
+		should_be_prefix.push(true);
+		let first_bit = bv2.minus_longest_common_prefix(&longest_common_prefix);
+		assert_eq!(should_be_prefix, bv2);
+		assert_eq!(true, first_bit);
+	}
 }
