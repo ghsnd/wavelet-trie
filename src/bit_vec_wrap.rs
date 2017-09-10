@@ -160,10 +160,11 @@ impl BitVecWrap {
 		}
 	}
 
-	pub fn minus_longest_common_prefix(&mut self, lcp: &BitVecWrap) -> bool {
+	pub fn different_suffix(&mut self, lcp: &BitVecWrap) -> (bool, BitVecWrap) {
 		let first_bit = self.get(lcp.len()).unwrap();
-		self.bit_vec = self.bit_vec.iter().skip(lcp.len() + 1).collect();
-		first_bit
+		let mut new_bitvector = BitVecWrap::new();
+		new_bitvector.bit_vec = self.bit_vec.iter().skip(lcp.len() + 1).collect();
+		(first_bit, new_bitvector)
 	}
 
 }
@@ -259,16 +260,16 @@ mod tests {
 	}
 
 	#[test]
-	fn minus_longest_common_prefix() {
+	fn different_suffix() {
 		let bv1     = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
 		let mut bv2 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101, 0b00011101]);
 		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
-		let mut should_be_prefix = BitVecWrap::from_bytes(&[0b10100011]);
-		should_be_prefix.push(true);
-		should_be_prefix.push(false);
-		should_be_prefix.push(true);
-		let first_bit = bv2.minus_longest_common_prefix(&longest_common_prefix);
-		assert_eq!(should_be_prefix, bv2);
-		assert_eq!(true, first_bit);
+		let mut should_be_suffix = BitVecWrap::from_bytes(&[0b10100011]);
+		should_be_suffix.push(true);
+		should_be_suffix.push(false);
+		should_be_suffix.push(true);
+		let result: (bool, BitVecWrap) = bv2.different_suffix(&longest_common_prefix);
+		assert_eq!(should_be_suffix, result.1);
+		assert_eq!(true, result.0);
 	}
 }
