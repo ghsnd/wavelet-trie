@@ -133,7 +133,7 @@ impl BitVecWrap {
 	// R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
 	// which is not what one might expect in the case of equal bitvectors!
 	pub fn longest_common_prefix (&self, other: &BitVecWrap) -> BitVecWrap {
-		if self.eq(other) {
+		if self == other {
 			let mut bit_vec_clone = self.clone();
 			//bit_vec_clone.pop();
 			//bit_vec_clone.pop();
@@ -160,7 +160,7 @@ impl BitVecWrap {
 		}
 	}
 
-	pub fn different_suffix(&mut self, lcp: &BitVecWrap) -> (bool, BitVecWrap) {
+	pub fn different_suffix(&self, lcp: &BitVecWrap) -> (bool, BitVecWrap) {
 		let first_bit = self.get(lcp.len()).unwrap();
 		let mut new_bitvector = BitVecWrap::new();
 		new_bitvector.bit_vec = self.bit_vec.iter().skip(lcp.len() + 1).collect();
