@@ -91,7 +91,7 @@ mod tests {
 	#[test]
 	fn different_suffix() {
 		let bv1     = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
-		let mut bv2 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101, 0b00011101]);
+		let bv2 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101, 0b00011101]);
 		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
 		let mut should_be_suffix = BitVecWrap::from_bytes(&[0b10100011]);
 		should_be_suffix.push(true);
