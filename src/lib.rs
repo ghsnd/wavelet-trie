@@ -6,13 +6,13 @@ use std::vec::Vec;
 // strings are assumed prefix-free. This can be solved by appending a terminator symbol at the end of the string.
 
 // a node in the wavelet trie
+#[derive(Debug)]
 pub struct WaveletTrie {
 	left: Option<Box<WaveletTrie>>,   // left subtrie, if any
 	right: Option<Box<WaveletTrie>>,  // right subtrie, if any
 	prefix: BitVecWrap,               // α in the literature
 	positions: BitVecWrap             // β in the literature
 }
-
 
 impl WaveletTrie {
 
@@ -27,7 +27,7 @@ impl WaveletTrie {
 	}
 
 	pub fn insert_static(&mut self, sequences: &[BitVecWrap]) {
-		if (!sequences.is_empty()) {
+		if !sequences.is_empty() {
 			// first check if all bitvectors in the sequence are the same
 			let first_sequence = &sequences[0];
 			let all_equal = sequences.iter().all( |current_sequence| current_sequence == first_sequence);
@@ -82,8 +82,14 @@ mod bit_vec_wrap;
 
 #[cfg(test)]
 mod tests {
+	use {BitVecWrap, WaveletTrie};
+
 	#[test]
-	fn it_works() {
+	fn insert_one_sequence() {
+		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
+		let mut wt = WaveletTrie::new();
+		wt.insert_static(&[sequence]);
+		println!("{:?}", wt);
 	}
 }
 
