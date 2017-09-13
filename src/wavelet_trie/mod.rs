@@ -38,11 +38,10 @@ impl WaveletTrie {
 				let mut left_child = WaveletTrie::new();
 				let mut right_child = WaveletTrie::new();
 				// find longest common prefix
-				self.prefix = 
-					sequences.iter()
-							.fold(BitVecWrap::new(),
-								|prefix, current_sequence| prefix.longest_common_prefix(current_sequence)
-							);
+				self.prefix = first_sequence.clone();
+				for sequence in sequences {
+					self.prefix = self.prefix.longest_common_prefix(sequence);
+				}
 				// split accordingly
 				let mut left_sequences: Vec<BitVecWrap> = Vec::new();
 				let mut right_sequences: Vec<BitVecWrap> = Vec::new();
