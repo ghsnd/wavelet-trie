@@ -97,7 +97,7 @@ mod tests {
 		should_be_suffix.push(true);
 		should_be_suffix.push(false);
 		should_be_suffix.push(true);
-		let result: (bool, BitVecWrap) = bv2.different_suffix(&longest_common_prefix);
+		let result: (bool, BitVecWrap) = bv2.different_suffix(longest_common_prefix.len());
 		assert_eq!(should_be_suffix, result.1);
 		assert_eq!(true, result.0);
 	}

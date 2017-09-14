@@ -29,6 +29,12 @@ impl BitVecWrap {
 		}
 	}
 
+	fn with_capacity(nbits: usize) -> Self {
+		BitVecWrap {
+			bit_vec: BitVec::with_capacity(nbits)
+		}
+	}
+
 	// constructor
 	pub fn from_bytes(bytes: &[u8]) -> Self {
 		BitVecWrap {
@@ -86,7 +92,7 @@ impl BitVecWrap {
 
 	// Number of ones in the vector before position "pos"
 	// i.e. in [0 .. pos-1]
-	fn rank_one(&self, pos: usize) -> usize {
+	pub fn rank_one(&self, pos: usize) -> usize {
 		if pos > self.bit_vec.len() {
 			panic!("Index out of bounds!");
 		}
@@ -108,7 +114,7 @@ impl BitVecWrap {
 		bit_count
 	}
 
-	fn rank_zero(&self, pos: usize) -> usize {
+	pub fn rank_zero(&self, pos: usize) -> usize {
 		if pos == 0 {
 			pos
 		} else {
@@ -145,6 +151,7 @@ impl BitVecWrap {
 	// R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
 	// which is not what one might expect in the case of equal bitvectors!
 	pub fn longest_common_prefix (&self, other: &BitVecWrap) -> BitVecWrap {
+		println!("lcp of {:?} and {:?}", self, other);
 		if self == other {
 			let mut bit_vec_clone = self.clone();
 			//bit_vec_clone.pop();
@@ -172,11 +179,20 @@ impl BitVecWrap {
 		}
 	}
 
-	pub fn different_suffix(&self, lcp: &BitVecWrap) -> (bool, BitVecWrap) {
-		let first_bit = self.get(lcp.len()).unwrap();
+	pub fn different_suffix(&self, len: usize) -> (bool, BitVecWrap) {
+		let first_bit = self.get(len).unwrap();
 		let mut new_bitvector = BitVecWrap::new();
-		new_bitvector.bit_vec = self.bit_vec.iter().skip(lcp.len() + 1).collect();
+		new_bitvector.bit_vec = self.bit_vec.iter().skip(len + 1).collect();
 		(first_bit, new_bitvector)
+	}
+
+	pub fn copy(&self) -> BitVecWrap {
+		let mut copy = BitVecWrap::with_capacity(self.len());
+		let bit_vec = &self.bit_vec;
+		for bit in bit_vec {
+			copy.push(bit);
+		}
+		copy
 	}
 
 }
