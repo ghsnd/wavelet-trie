@@ -90,7 +90,7 @@ mod tests {
 
 	#[test]
 	fn different_suffix() {
-		let bv1     = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
+		let bv1 = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
 		let bv2 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101, 0b00011101]);
 		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
 		let mut should_be_suffix = BitVecWrap::from_bytes(&[0b10100011]);
@@ -100,5 +100,14 @@ mod tests {
 		let result: (bool, BitVecWrap) = bv2.different_suffix(&longest_common_prefix);
 		assert_eq!(should_be_suffix, result.1);
 		assert_eq!(true, result.0);
+	}
+
+	#[test]
+	fn is_prefix_of() {
+		let bv1 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101]);
+		let bv2 = BitVecWrap::from_bytes(&[0b01010101, 0b01011101, 0b00011101]);
+		let bv3 = BitVecWrap::from_bytes(&[0b01010101, 0b01000001, 0b00011101]);
+		assert_eq!(true, bv1.is_prefix_of(&bv2));
+		assert_eq!(false, bv1.is_prefix_of(&bv3));
 	}
 }

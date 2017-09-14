@@ -128,6 +128,18 @@ impl BitVecWrap {
 		self.bit_vec.truncate(len);
 	}
 
+	pub fn to_bytes(&self) -> Vec<u8> {
+		self.bit_vec.to_bytes()
+	}
+
+	// returns true if "self" is a prefix of "other". Assumes self.len() <= other.len()!
+	pub fn is_prefix_of(&self, other: &BitVecWrap) -> bool {
+		let bytes_self = &self.to_bytes()[..];	// convert to slice
+		let length = bytes_self.len();
+		let bytes_other = &other.to_bytes()[0..length];
+		bytes_self == bytes_other
+	}
+
 	// get the <common prefix> part of <common prefix><different bit><different suffix>
 	// as defined in
 	// R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
