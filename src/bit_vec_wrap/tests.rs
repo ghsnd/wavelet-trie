@@ -61,9 +61,7 @@ mod tests {
 		let bv1 = BitVecWrap::from_bytes(&[0b01010101]);
 		let bv2 = BitVecWrap::from_bytes(&[0b01010101]);
 		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
-		let mut should_be_prefix = BitVecWrap::from_bytes(&[0b01010101]);
-		should_be_prefix.pop();
-		should_be_prefix.pop();
+		let should_be_prefix = BitVecWrap::from_bytes(&[0b01010101]);
 		assert_eq!(should_be_prefix, longest_common_prefix);
 	}
 
@@ -85,7 +83,7 @@ mod tests {
 		let bv1 = BitVecWrap::new();
 		let bv2 = BitVecWrap::from_bytes(&[0b01010101]);
 		let longest_common_prefix = bv1.longest_common_prefix(&bv2);
-		assert_eq!(0, longest_common_prefix.len());
+		assert_eq!(true, longest_common_prefix.is_empty());
 	}
 
 	#[test]

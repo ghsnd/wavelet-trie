@@ -83,6 +83,7 @@ mod tests {
 		let sequences = &[s1, s2, s3, s4, s5, s6, s7];
 		let mut wt = WaveletTrie::new();
 		wt.insert_static(sequences);
+		println!("{:?}", wt);
 	}
 
 }

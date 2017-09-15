@@ -8,10 +8,11 @@ use std::vec::Vec;
 // a node in the wavelet trie
 #[derive(Debug)]
 pub struct WaveletTrie {
-	left: Option<Box<WaveletTrie>>,   // left subtrie, if any
-	right: Option<Box<WaveletTrie>>,  // right subtrie, if any
 	prefix: BitVecWrap,               // α in the literature
-	positions: BitVecWrap             // β in the literature
+	positions: BitVecWrap,            // β in the literature
+	left: Option<Box<WaveletTrie>>,   // left subtrie, if any
+	right: Option<Box<WaveletTrie>>   // right subtrie, if any
+
 }
 
 impl WaveletTrie {

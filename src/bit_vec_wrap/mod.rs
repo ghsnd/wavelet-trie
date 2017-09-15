@@ -153,11 +153,7 @@ impl BitVecWrap {
 	pub fn longest_common_prefix (&self, other: &BitVecWrap) -> BitVecWrap {
 		println!("lcp of {:?} and {:?}", self, other);
 		if self == other {
-			let mut bit_vec_clone = self.clone();
-			//bit_vec_clone.pop();
-			//bit_vec_clone.pop();
-			bit_vec_clone.truncate(self.len() - 2);
-			bit_vec_clone
+			self.clone()
 		} else {
 			// OPTIMIZEME
 			let mut new_bit_vec = BitVecWrap::new();
