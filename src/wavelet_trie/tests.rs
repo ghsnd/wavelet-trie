@@ -46,6 +46,7 @@ mod tests {
 	#[test]
 	fn rank() {
 		// this tests the binary example from the paper
+		// see also example.txt in de root of this repo
 
 		// 0001
 		let mut s1 = BitVecWrap::new();
@@ -93,6 +94,19 @@ mod tests {
 		assert_eq!(Some(2), wt.rank(&s8, 5));
 		assert_eq!(Some(2), wt.rank(&s8, 6));
 		assert_eq!(Some(3), wt.rank(&s8, 7));
+
+		let mut seq_0 = BitVecWrap::new();
+		seq_0.push(false);
+		for number in 0..7 {
+			assert_eq!(Some(number), wt.rank(&seq_0, number));
+		}
+
+		let mut seq_none = BitVecWrap::new();
+		seq_none.push(false);
+		seq_none.push(false);
+		seq_none.push(false);
+		seq_none.push(false);
+		assert_eq!(None, wt.rank(&seq_none, 7));
 	}
 
 }
