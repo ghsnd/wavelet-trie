@@ -140,10 +140,19 @@ impl BitVecWrap {
 
 	// returns true if "self" is a prefix of "other". Assumes self.len() <= other.len()!
 	pub fn is_prefix_of(&self, other: &BitVecWrap) -> bool {
-		let bytes_self = &self.to_bytes()[..];	// convert to slice
+		/*let bytes_self = &self.to_bytes()[..];	// convert to slice
 		let length = bytes_self.len();
 		let bytes_other = &other.to_bytes()[0..length];
-		bytes_self == bytes_other
+		bytes_self == bytes_other*/
+		let mut index = 0;
+		let mut same = true;
+		while same && index < self.len() {
+			if self.get(index) != other.get(index) {
+				same = false;
+			}
+			index = index + 1;
+		}
+		same
 	}
 
 	// get the <common prefix> part of <common prefix><different bit><different suffix>

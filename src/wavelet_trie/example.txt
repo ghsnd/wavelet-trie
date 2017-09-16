@@ -1,0 +1,35 @@
+WaveletTrie { 
+	prefix: BitVecWrap { bit_vec: 0 },
+	positions: BitVecWrap { bit_vec: 0010101 },
+	left: Some(WaveletTrie { 
+		prefix: BitVecWrap { bit_vec:  },
+		positions: BitVecWrap { bit_vec: 0111 },
+		left: Some(WaveletTrie {
+			prefix: BitVecWrap { bit_vec: 1 },
+			positions: BitVecWrap { bit_vec:  },
+			left: None,
+			right: None
+		}),
+		right: Some(WaveletTrie {
+			prefix: BitVecWrap { bit_vec:  },
+			positions: BitVecWrap { bit_vec: 100 },
+			left: Some(WaveletTrie {
+				prefix: BitVecWrap { bit_vec: 0 },
+				positions: BitVecWrap { bit_vec:  },
+				left: None, right: None
+			}),
+			right: Some(WaveletTrie {
+				prefix: BitVecWrap { bit_vec:  },
+				positions: BitVecWrap { bit_vec:  },
+				left: None,
+				right: None
+			})
+		})
+	}),
+	right: Some(WaveletTrie {
+		prefix: BitVecWrap { bit_vec: 00 },
+		positions: BitVecWrap { bit_vec:  },
+		left: None,
+		right: None
+	})
+}
