@@ -68,14 +68,11 @@ impl WaveletTrie {
 	// count the number of occurrences "sequence" (can be a prefix) up to index − 1.
 	// returns None if sequence does not occur
 	pub fn rank(&self, sequence: &BitVecWrap, index: usize) -> Option<usize> {
-		println!("rank ({:?}, {}, \tprefix:{:?})", sequence, index, self.prefix);
 		if sequence.is_empty() || sequence == &self.prefix {
-			println!("sequence is empty or equal to prefix => result: {}", index);
 			Some(index)
 		} else if sequence.len() < self.prefix.len() {
 			// sequence has to be a prefix of "prefix"
-			// if so, return "index"
-			println!("sequence should be prefix of prefix");
+			// if so, return "index". If not, the sequence is not in the trie.
 			match sequence.is_prefix_of(&self.prefix) {
 				true => Some(index),
 				false => None
@@ -83,12 +80,11 @@ impl WaveletTrie {
 		} else {
 			// "prefix" has to be a prefix of sequence
 			// if so, substract "prefix" from the beginning of sequence, and recurse!
-			println!("prefix should be prefix of sequence");
 			match self.prefix.is_prefix_of(sequence) {
 				true => {
-					println!("and it is! Recurse!");
 					let (bit, suffix) = sequence.different_suffix(self.prefix.len());
 					match bit {
+						// TODO: rewrite with closures?
 						true => {
 							let new_index = self.positions.rank_one(index);
 							match self.right {
@@ -105,10 +101,7 @@ impl WaveletTrie {
 						}
 					}
 				},
-				false => {
-					println!("It's not! returning None");
-					None
-				}
+				false => None
 			}
 		}
 	}
