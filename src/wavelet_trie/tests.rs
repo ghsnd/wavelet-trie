@@ -109,4 +109,12 @@ mod tests {
 		assert_eq!(None, wt.rank(&seq_none, 7));
 	}
 
+	#[test]
+	fn insert_dynamic_one_sequence() {
+		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
+		let mut wt = WaveletTrie::new();
+		wt.insert(&sequence, 0);
+		println!("{:?}", wt);
+		// TODO: assert; wait for "rank"
+	}
 }

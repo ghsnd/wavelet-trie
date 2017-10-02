@@ -65,6 +65,86 @@ impl WaveletTrie {
 		}
 	}
 
+	pub fn insert(&mut self, sequence: &BitVecWrap, index: usize) {
+		// if sequence == prefix {
+		//   if no children => OK, return
+		//   else => prefix is prefix of sequence; not allowed!
+		// } else if sequence is prefix of prefix {
+		//   sequence is prefix of prefix; not allowed!
+		// } else {
+		//   lcp = longest common prefix
+		//   if lcp == prefix
+		//   if lcp empty && prefix not empty =>
+		// }
+
+		if *sequence == self.prefix {
+			if self.left.is_some() {
+				// prefix is prefix of sequence; not allowed!
+				panic!("strings are not prefix-free anymore. Cannot do this.");
+			} else {
+				// OK
+				return
+			}
+		} else if sequence.is_prefix_of(&self.prefix) {
+			panic!("strings are not prefix-free anymore. Cannot do this.");
+		} else {
+			if self.prefix.is_empty() {
+				//TODO
+			} else {
+				// TODO
+			}
+			let lcp = sequence.longest_common_prefix(&self.prefix);
+			// bit_1 determines wheter original node comes as left or right child in of new node
+			// suffix_self becomes prefix in new split node
+			let (bit_1, suffix_self) = self.prefix.different_suffix(lcp.len());
+			// suffix_seq becomes prefix in new leaf
+			let (bit_2, suffix_seq) = sequence.different_suffix(lcp.len());
+
+			if lcp == self.prefix {
+				// we need to recurse further
+				if bit_2 {
+					if let Some(ref mut child) = self.right {
+						child.insert(&suffix_seq, 0);
+					}
+				} else {
+					if let Some(ref mut child) = self.left {
+						child.insert(&suffix_seq, 0);
+					}
+				}
+			} else {
+
+				// reconstruct the original node
+				let original_left = self.left.take();
+				let original_right = self.right.take();
+				let original_positions = self.positions.copy();
+				let original_node = WaveletTrie {
+					left: original_left,
+					right: original_right,
+					prefix: lcp,
+					positions: original_positions
+				};
+	
+				// create the leaf
+				let new_leaf = WaveletTrie {
+					left: None,
+					right: None,
+					prefix: suffix_seq,
+					//positions : BitVecWrap::from_elem(original_positions.len() /* check this! */, bit_2)
+					positions : BitVecWrap::new()
+				};
+
+				// make this node the new node
+				let (new_left, new_right) = match bit_1 {
+					false => (Some(Box::new(original_node)), Some(Box::new(new_leaf))),
+					true => (Some(Box::new(new_leaf)), Some(Box::new(original_node)))
+				};
+				self.left = new_left;
+				self.right = new_right;
+				self.prefix = suffix_self;
+			}
+		}
+	}
+
 	// count the number of occurrences "sequence" (can be a prefix) up to index − 1.
 	// returns None if sequence does not occur
 	pub fn rank(&self, sequence: &BitVecWrap, index: usize) -> Option<usize> {
