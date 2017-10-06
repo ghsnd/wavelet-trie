@@ -65,7 +65,8 @@ impl WaveletTrie {
 		}
 	}
 
-	pub fn insert(&mut self, sequence: &BitVecWrap, index: usize) {
+	// TODO: rewrite with results!
+	pub fn insert(&mut self, sequence: &BitVecWrap, index: usize) -> Result<usize, &'static str> {
 		// if sequence == prefix {
 		//   if no children => OK, return
 		//   else => prefix is prefix of sequence; not allowed!
@@ -77,41 +78,90 @@ impl WaveletTrie {
 		//   if lcp empty && prefix not empty =>
 		// }
 
-		if *sequence == self.prefix {
-			if self.left.is_some() {
-				// prefix is prefix of sequence; not allowed!
-				panic!("strings are not prefix-free anymore. Cannot do this.");
-			} else {
-				// OK
-				return
-			}
-		} else if sequence.is_prefix_of(&self.prefix) {
-			panic!("strings are not prefix-free anymore. Cannot do this.");
-		} else {
-			if self.prefix.is_empty() {
-				//TODO
-			} else {
-				// TODO
-			}
-			let lcp = sequence.longest_common_prefix(&self.prefix);
-			// bit_1 determines wheter original node comes as left or right child in of new node
-			// suffix_self becomes prefix in new split node
-			let (bit_1, suffix_self) = self.prefix.different_suffix(lcp.len());
-			// suffix_seq becomes prefix in new leaf
-			let (bit_2, suffix_seq) = sequence.different_suffix(lcp.len());
+		if self.prefix.is_empty() {
+			// case 1: empty prefix, no children
+			if self.left.is_none() {
+				self.prefix = sequence.copy();
+				//Ok(0)
 
-			if lcp == self.prefix {
-				// we need to recurse further
-				if bit_2 {
-					if let Some(ref mut child) = self.right {
-						child.insert(&suffix_seq, 0);
-					}
+			// case 2: empty prefix, children
+			} else {
+				if sequence.is_empty() {
+					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (1)");
+					//Err("The string being inserded is a prefix of a string in the trie, which is not allowed.")
 				} else {
-					if let Some(ref mut child) = self.left {
-						child.insert(&suffix_seq, 0);
-					}
+					// recursively insert sequence minus the first bit in a child determined by the first bit
+					let (bit, suffix) = sequence.different_suffix(0);
+
+					// simplify this with clojures?
+					let result = match bit {
+						true => {
+							if let Some(ref mut child) = self.right {
+								child.insert(&suffix, 0) // TODO: calculate right position
+								// TODO: 
+							} else {
+								Err("The right child has run away!")
+							}
+						},
+						false => {
+							if let Some(ref mut child) = self.left {
+								child.insert(&suffix, 0) // TODO: calculate right position
+								// TODO: 
+							} else {
+								Err("The left child has run away!")
+							}
+						}
+					};
+					return result;
+					//return child_to_insert.unwrap().insert(&suffix, 0);	
+					// TODO: re-calculate position before returning the result
+				}
+			}
+
+		// case 3: prefix is not empty
+		} else {
+			if &self.prefix == sequence {
+				if self.left.is_none() {
+					return Ok(0);
+				} else {
+					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (2)");
+				}
+			} else if sequence.is_prefix_of(&self.prefix) {
+				return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (3)");
+			} else if self.prefix.is_prefix_of(sequence) {
+				if self.left.is_none() {
+					return Err("A string in the trie The string being inserded is a prefix of a , which is not allowed. (3)");
+				} else {
+					let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+
+					// simplify this with clojures?
+					let result = match bit {
+						true => {
+							if let Some(ref mut child) = self.right {
+								child.insert(&suffix, 0) // TODO: calculate right position
+								// TODO: 
+							} else {
+								Err("The right child has run away!")
+							}
+						},
+						false => {
+							if let Some(ref mut child) = self.left {
+								child.insert(&suffix, 0) // TODO: calculate right position
+								// TODO: 
+							} else {
+								Err("The left child has run away!")
+							}
+						}
+					};
+					return result;
 				}
 			} else {
+				let lcp = sequence.longest_common_prefix(&self.prefix);
+				// bit_self determines wheter original node comes as left or right child in of new node
+				// suffix_self becomes prefix in new split node
+				let (bit_self, suffix_self) = self.prefix.different_suffix(lcp.len());
+				// suffix_seq becomes prefix in new leaf
+				let (_, suffix_seq) = sequence.different_suffix(lcp.len());
 
 				// reconstruct the original node
 				let original_left = self.left.take();
@@ -121,7 +171,7 @@ impl WaveletTrie {
 					left: original_left,
 					right: original_right,
 					prefix: lcp,
-					positions: original_positions
+					positions: original_positions	// TODO: shouldn't thid be the vector initialised with the same bits?
 				};
 	
 				// create the leaf
@@ -134,15 +184,19 @@ impl WaveletTrie {
 				};
 
 				// make this node the new node
-				let (new_left, new_right) = match bit_1 {
+				let (new_left, new_right) = match bit_self {
 					false => (Some(Box::new(original_node)), Some(Box::new(new_leaf))),
 					true => (Some(Box::new(new_leaf)), Some(Box::new(original_node)))
 				};
 				self.left = new_left;
 				self.right = new_right;
 				self.prefix = suffix_self;
+
+				return Ok(0)
 			}
+			return Ok(0)
 		}
+		Ok(0)
 	}
 
 	// count the number of occurrences "sequence" (can be a prefix) up to index − 1.
