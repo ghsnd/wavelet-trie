@@ -67,16 +67,30 @@ impl WaveletTrie {
 
 	// TODO: rewrite with results!
 	pub fn insert(&mut self, sequence: &BitVecWrap, index: usize) -> Result<usize, &'static str> {
-		// if sequence == prefix {
-		//   if no children => OK, return
-		//   else => prefix is prefix of sequence; not allowed!
-		// } else if sequence is prefix of prefix {
-		//   sequence is prefix of prefix; not allowed!
-		// } else {
-		//   lcp = longest common prefix
-		//   if lcp == prefix
-		//   if lcp empty && prefix not empty =>
-		// }
+		// 1. self.prefix is empty, no children:
+		//     self.prefix = sequence
+		// 2. self.prefix is empty, children:
+		//     2.a. sequence is empty:
+		//         ERROR: sequence a prefix of self.prefix
+		//     2.b. sequence not empty:
+		//         Take the first bit off of sequence; this determines whether the rest of sequence is inserted into the left or right child
+		// 3. self.prefix not empty:
+		//     3.a. sequence is empty:
+		//         ERROR: sequence is prefix of string already in the trie
+		//     3.b. self.prefix == sequence:
+		//         if no children: OK
+		//         if children: ERROR: sequence is prefix of string already in trie
+		//     3.c. sequence is prefix of self.prefix:
+		//         ERROR
+		//     3.d. self.prefix is prefix of sequence:
+		//         if children: substract self.prefix from sequence, take the first bit off of sequence; this determines whether the rest of sequence is inserted into the left or right child
+		//         if no children: ERROR
+		//     else:
+		//         (split current node; one child is existing trie and the other a new leaf)
+		//         calculate longest common prefix (lcp) of self.prefix and sequence
+		//         one new node has as prefix the suffix of self.prefix and the original children
+		//         one new node had as prefix the suffix of sequence and no children
+		//         self.prefix = lcp; self.left and self.right are the new nodes, determined by the first buit of the calculated suffixes
 
 		if self.prefix.is_empty() {
 			// case 1: empty prefix, no children
@@ -120,7 +134,9 @@ impl WaveletTrie {
 
 		// case 3: prefix is not empty
 		} else {
-			if &self.prefix == sequence {
+			if sequence.is_empty() {
+				return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (5)");
+			} else if &self.prefix == sequence {
 				if self.left.is_none() {
 					return Ok(0);
 				} else {
@@ -130,7 +146,7 @@ impl WaveletTrie {
 				return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (3)");
 			} else if self.prefix.is_prefix_of(sequence) {
 				if self.left.is_none() {
-					return Err("A string in the trie The string being inserded is a prefix of a , which is not allowed. (3)");
+					return Err("A string in the trie The string being inserded is a prefix of a , which is not allowed. (4)");
 				} else {
 					let (bit, suffix) = sequence.different_suffix(self.prefix.len());
 
@@ -194,7 +210,6 @@ impl WaveletTrie {
 
 				return Ok(0)
 			}
-			return Ok(0)
 		}
 		Ok(0)
 	}
