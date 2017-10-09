@@ -132,4 +132,53 @@ mod tests {
 		println!("{:?}", wt);
 		// TODO: assert; wait for "rank"
 	}
+
+	#[test]
+	fn insert_example_dynamic() {
+		// 0001
+		let mut s1 = BitVecWrap::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = BitVecWrap::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = BitVecWrap::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = BitVecWrap::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let s5 = s3.copy();
+		let s6 = s4.copy();
+		let s7 = s3.copy();
+		let s8 = s3.copy();
+
+		let mut wt = WaveletTrie::new();
+		wt.insert(&s1, 0);
+		wt.insert(&s2, 1);
+		wt.insert(&s3, 2);
+		wt.insert(&s4, 3);
+		wt.insert(&s5, 4);
+		wt.insert(&s6, 5);
+		wt.insert(&s7, 6);
+		wt.insert(&s8, 7);
+		
+		println!("{:?}", wt);
+	}
 }
