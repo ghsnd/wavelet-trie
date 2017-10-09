@@ -170,7 +170,7 @@ impl WaveletTrie {
 				let original_node = WaveletTrie {
 					left: original_left,
 					right: original_right,
-					prefix: lcp,
+					prefix: suffix_self,
 					positions: original_positions	// TODO: shouldn't thid be the vector initialised with the same bits?
 				};
 	
@@ -190,7 +190,7 @@ impl WaveletTrie {
 				};
 				self.left = new_left;
 				self.right = new_right;
-				self.prefix = suffix_self;
+				self.prefix = lcp;
 
 				return Ok(0)
 			}

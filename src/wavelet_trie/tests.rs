@@ -117,4 +117,19 @@ mod tests {
 		println!("{:?}", wt);
 		// TODO: assert; wait for "rank"
 	}
+
+	#[test]
+	fn insert_dynamic() {
+		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
+		let sequence2 = BitVecWrap::from_bytes(&[0b00001000]);
+		let sequence3 = BitVecWrap::from_bytes(&[0b00011000]);
+		let mut wt = WaveletTrie::new();
+		wt.insert(&sequence1, 0);
+		println!("{:?}", wt);
+		wt.insert(&sequence2, 0);
+		println!("{:?}", wt);
+		wt.insert(&sequence3, 0);
+		println!("{:?}", wt);
+		// TODO: assert; wait for "rank"
+	}
 }
