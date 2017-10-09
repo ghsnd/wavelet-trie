@@ -96,7 +96,7 @@ impl WaveletTrie {
 			// case 1: empty prefix, no children
 			if self.left.is_none() {
 				self.prefix = sequence.copy();
-				//Ok(0)
+				return Ok(0);
 
 			// case 2: empty prefix, children
 			} else {
@@ -211,7 +211,6 @@ impl WaveletTrie {
 				return Ok(0)
 			}
 		}
-		Ok(0)
 	}
 
 	// count the number of occurrences "sequence" (can be a prefix) up to index − 1.
