@@ -96,6 +96,7 @@ impl WaveletTrie {
 			// case 1: empty prefix, no children
 			if self.left.is_none() {
 				self.prefix = sequence.copy();
+				self.positions.push(false);
 				return Ok(0);
 
 			// case 2: empty prefix, children
@@ -106,12 +107,14 @@ impl WaveletTrie {
 				} else {
 					// recursively insert sequence minus the first bit in a child determined by the first bit
 					let (bit, suffix) = sequence.different_suffix(0);
+					self.positions.insert(index, bit); 
 
 					// simplify this with clojures?
 					let result = match bit {
 						true => {
 							if let Some(ref mut child) = self.right {
-								child.insert(&suffix, 0) // TODO: calculate right position
+								let new_pos = self.positions.rank_one(index);
+								child.insert(&suffix, new_pos)
 								// TODO: 
 							} else {
 								Err("The right child has run away!")
@@ -119,7 +122,8 @@ impl WaveletTrie {
 						},
 						false => {
 							if let Some(ref mut child) = self.left {
-								child.insert(&suffix, 0) // TODO: calculate right position
+								let new_pos = self.positions.rank_zero(index);
+								child.insert(&suffix, new_pos)
 								// TODO: 
 							} else {
 								Err("The left child has run away!")
@@ -138,6 +142,7 @@ impl WaveletTrie {
 				return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (5)");
 			} else if &self.prefix == sequence {
 				if self.left.is_none() {
+					self.positions.insert(index, false);
 					return Ok(0);
 				} else {
 					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (2)");
@@ -149,12 +154,14 @@ impl WaveletTrie {
 					return Err("A string in the trie The string being inserded is a prefix of a , which is not allowed. (4)");
 				} else {
 					let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+					self.positions.insert(index, bit);
 
 					// simplify this with clojures?
 					let result = match bit {
 						true => {
 							if let Some(ref mut child) = self.right {
-								child.insert(&suffix, 0) // TODO: calculate right position
+								let new_pos = self.positions.rank_one(index);
+								child.insert(&suffix, new_pos)
 								// TODO: 
 							} else {
 								Err("The right child has run away!")
@@ -162,7 +169,8 @@ impl WaveletTrie {
 						},
 						false => {
 							if let Some(ref mut child) = self.left {
-								child.insert(&suffix, 0) // TODO: calculate right position
+								let new_pos = self.positions.rank_zero(index);
+								child.insert(&suffix, new_pos) // TODO: calculate right position
 								// TODO: 
 							} else {
 								Err("The left child has run away!")
@@ -177,7 +185,7 @@ impl WaveletTrie {
 				// suffix_self becomes prefix in new split node
 				let (bit_self, suffix_self) = self.prefix.different_suffix(lcp.len());
 				// suffix_seq becomes prefix in new leaf
-				let (_, suffix_seq) = sequence.different_suffix(lcp.len());
+				let (bit_seq, suffix_seq) = sequence.different_suffix(lcp.len());
 
 				// reconstruct the original node
 				let original_left = self.left.take();
@@ -187,7 +195,7 @@ impl WaveletTrie {
 					left: original_left,
 					right: original_right,
 					prefix: suffix_self,
-					positions: original_positions	// TODO: shouldn't thid be the vector initialised with the same bits?
+					positions: original_positions
 				};
 	
 				// create the leaf
@@ -196,7 +204,7 @@ impl WaveletTrie {
 					right: None,
 					prefix: suffix_seq,
 					//positions : BitVecWrap::from_elem(original_positions.len() /* check this! */, bit_2)
-					positions : BitVecWrap::new()
+					positions : BitVecWrap::from_elem(1, false)
 				};
 
 				// make this node the new node
@@ -207,6 +215,9 @@ impl WaveletTrie {
 				self.left = new_left;
 				self.right = new_right;
 				self.prefix = lcp;
+				let pos_len = self.positions.len();
+				self.positions = BitVecWrap::from_elem(pos_len, bit_self);
+				self.positions.insert(index, bit_seq);
 
 				return Ok(0)
 			}

@@ -126,7 +126,7 @@ mod tests {
 		let mut wt = WaveletTrie::new();
 		wt.insert(&sequence1, 0);
 		println!("{:?}", wt);
-		wt.insert(&sequence2, 0);
+		wt.insert(&sequence2, 1);
 		println!("{:?}", wt);
 		wt.insert(&sequence3, 0);
 		println!("{:?}", wt);
