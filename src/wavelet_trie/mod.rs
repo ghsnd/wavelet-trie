@@ -27,14 +27,20 @@ impl WaveletTrie {
 		}
 	}
 
-	// TODO: turn this into static constructor
-	pub fn insert_static(&mut self, sequences: &[BitVecWrap]) {
+	pub fn from_sequences(sequences: &[BitVecWrap]) -> Self {
+		let mut wavelet_trie = WaveletTrie::new();
+		wavelet_trie.insert_static(sequences);
+		wavelet_trie
+	}
+
+	fn insert_static(&mut self, sequences: &[BitVecWrap]) {
 		if !sequences.is_empty() {
 			// first check if all bitvectors in the sequence are the same
 			let first_sequence = &sequences[0];
 			let all_equal = sequences.iter().all( |current_sequence| current_sequence == first_sequence);
 			if all_equal {
 				self.prefix = first_sequence.clone();
+				self.positions = BitVecWrap::from_elem(sequences.len(), false)
 			} else {
 				// create children
 				let mut left_child = WaveletTrie::new();
@@ -244,6 +250,11 @@ impl WaveletTrie {
 				false => None
 			}
 		}
+	}
+
+	// the number of sequences contained in this trie
+	pub fn len(&self) -> usize {
+		self.positions.len()
 	}
 }
 

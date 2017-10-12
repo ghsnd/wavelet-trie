@@ -8,7 +8,7 @@ use self::bit_vec::BitVec;
 // at arbitrary points in the vector. It can even be compressed! See
 // V. Mäkinen and G. Navarro. Dynamic entropy-compressed sequences and full-text indexes.
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Eq, Hash)]
 pub struct BitVecWrap {
 	bit_vec: BitVec,
 }

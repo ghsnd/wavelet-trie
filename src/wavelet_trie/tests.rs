@@ -2,34 +2,42 @@
 mod tests {
 	use bit_vec_wrap::BitVecWrap;
 	use wavelet_trie::WaveletTrie;
+	use std::collections::HashMap;
+
+	// inserts the sequences statically in a wavelet trie and checks the
+	// ranks of the sequences at the last position when inserted.
+	fn insert_static_and_check(sequences: &[BitVecWrap]) {
+		let mut sequence_counter = HashMap::new();
+		let wt = WaveletTrie::from_sequences(sequences);
+		let len = wt.len();
+		assert_eq!(sequences.len(), len);
+		for sequence in sequences {
+			let counter = sequence_counter.entry(sequence).or_insert(0);
+			*counter += 1;
+		}
+		for (sequence, count) in sequence_counter {
+			assert_eq!(Some(count), wt.rank(sequence, len));
+		}
+	}
 
 	#[test]
 	fn insert_one_sequence() {
 		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
-		let mut wt = WaveletTrie::new();
-		wt.insert_static(&[sequence]);
-		println!("{:?}", wt);
-		// TODO: assert; wait for "rank"
+		insert_static_and_check(&[sequence]);
 	}
 
 	#[test]
 	fn insert_same_sequences() {
 		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence2 = BitVecWrap::from_bytes(&[0b00001000]);
-		let mut wt = WaveletTrie::new();
-		wt.insert_static(&[sequence1, sequence2]);
-		println!("{:?}", wt);
-		// TODO: assert; wait for "rank"
+		insert_static_and_check(&[sequence1, sequence2]);
 	}
 
 	#[test]
 	fn insert_two_different_sequences() {
 		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
-		let mut wt = WaveletTrie::new();
-		wt.insert_static(&[sequence1, sequence2]);
-		println!("{:?}", wt);
-		// TODO: assert; wait for "rank"
+		insert_static_and_check(&[sequence1, sequence2]);
 	}
 
 	#[test]
@@ -37,10 +45,7 @@ mod tests {
 		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
 		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
-		let mut wt = WaveletTrie::new();
-		wt.insert_static(&[sequence1, sequence2, sequence3]);
-		println!("{:?}", wt);
-		// TODO: assert; wait for "rank"
+		insert_static_and_check(&[sequence1, sequence2, sequence3]);
 	}
 
 	#[test]
