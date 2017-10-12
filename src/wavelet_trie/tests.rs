@@ -3,7 +3,7 @@ mod tests {
 	use bit_vec_wrap::BitVecWrap;
 	use wavelet_trie::WaveletTrie;
 
-	#[test]
+/*	#[test]
 	fn insert_one_sequence() {
 		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
 		let mut wt = WaveletTrie::new();
@@ -116,10 +116,10 @@ mod tests {
 		wt.insert(&sequence, 0);
 		println!("{:?}", wt);
 		// TODO: assert; wait for "rank"
-	}
+	}*/
 
 	#[test]
-	fn insert_dynamic() {
+	fn insert_dynamic_out_of_order() {
 		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence2 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence3 = BitVecWrap::from_bytes(&[0b00011000]);
@@ -133,8 +133,8 @@ mod tests {
 		// TODO: assert; wait for "rank"
 	}
 
-	#[test]
-	fn insert_example_dynamic() {
+/*	#[test]
+	fn insert_example_dynamic_in_order() {
 		// 0001
 		let mut s1 = BitVecWrap::new();
 		s1.push(false);
@@ -180,5 +180,5 @@ mod tests {
 		wt.insert(&s8, 7);
 		
 		println!("{:?}", wt);
-	}
+	}*/
 }

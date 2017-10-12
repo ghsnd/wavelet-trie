@@ -66,9 +66,11 @@ impl BitVecWrap {
 	pub fn insert(&mut self, i: usize, elem: bool) {
 		self.bit_vec.push(false); // just to make it grow
 		for index in (i..self.bit_vec.len()).rev() {
-			let prev_bit = self.bit_vec.get(index - 1);
-			if let Some(bit) = prev_bit {
-				self.bit_vec.set(index, bit);
+			if index > 0 {
+				let prev_bit = self.bit_vec.get(index - 1);
+				if let Some(bit) = prev_bit {
+					self.bit_vec.set(index, bit);
+				}
 			}
 		}
 		self.bit_vec.set(i, elem);
