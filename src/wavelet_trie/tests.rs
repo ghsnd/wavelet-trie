@@ -229,4 +229,54 @@ mod tests {
 		wt.insert(&s7, 6);
 		println!("{:?}", wt);
 	}
+
+	#[test]
+	fn append() {
+		// 0001
+		let mut s1 = BitVecWrap::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = BitVecWrap::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = BitVecWrap::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = BitVecWrap::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let s5 = s3.copy();
+		let s6 = s4.copy();
+		let s7 = s3.copy();
+		let s8 = s3.copy();
+
+		let mut wt = WaveletTrie::new();
+		wt.append(&s1);
+		wt.append(&s2);
+		wt.append(&s3);
+		wt.append(&s4);
+		wt.append(&s5);
+		wt.append(&s6);
+		wt.append(&s7);
+		wt.append(&s8);
+
+		println!("{:?}", wt);
+	}
+
 }

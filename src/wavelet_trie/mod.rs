@@ -65,7 +65,13 @@ impl WaveletTrie {
 		}
 	}
 
-	// TODO: rewrite with results!
+	// append a sequence to the trie at last position
+	pub fn append(&mut self, sequence: &BitVecWrap) -> Result<(), &'static str> {
+		let index = self.positions.len();
+		self.insert(sequence, index)
+	}
+
+	// insert a sequence to the trie at some index
 	pub fn insert(&mut self, sequence: &BitVecWrap, index: usize) -> Result<(), &'static str> {
 		// 1. self.prefix is empty, no children:
 		//     self.prefix = sequence
