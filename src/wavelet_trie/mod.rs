@@ -256,6 +256,33 @@ impl WaveletTrie {
 	pub fn len(&self) -> usize {
 		self.positions.len()
 	}
+
+	// retrieve the sequence at the given index
+	pub fn access(&self, index: usize) -> BitVecWrap {
+		let mut result = self.prefix.copy();
+		if self.left.is_some() {	// if NO children, the position vector doesn't count...
+			let bit_option = self.positions.get(index);
+			if let Some(bit) = bit_option {
+				result.push(bit);
+				match bit {
+					true => {
+						let new_index = self.positions.rank_one(index);
+						if let Some(ref trie) = self.right {
+							result.append(trie.access(new_index));
+						}
+					},
+					false => {
+						let new_index = self.positions.rank_zero(index);
+						if let Some(ref trie) = self.left {
+							result.append(trie.access(new_index));
+						}
+					}
+				};
+			}
+		}
+		result
+	}
+
 }
 
 mod tests;

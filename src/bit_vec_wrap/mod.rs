@@ -76,9 +76,9 @@ impl BitVecWrap {
 		self.bit_vec.set(i, elem);
 	}
 
-	/*pub fn insert(&mut self, i: usize, other: &BitVecWrap) {
-		
-	}*/
+	pub fn append(&mut self, other: BitVecWrap) {
+		self.bit_vec.extend(other.bit_vec);
+	}
 
 	// delete a bit at index i, hereby shifting the bits after i one position towards the beginning
 	// OPTIMIZEME
@@ -162,7 +162,7 @@ impl BitVecWrap {
 	// R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
 	// which is not what one might expect in the case of equal bitvectors!
 	pub fn longest_common_prefix (&self, other: &BitVecWrap) -> BitVecWrap {
-		println!("lcp of {:?} and {:?}", self, other);
+		//println!("lcp of {:?} and {:?}", self, other);
 		if self == other {
 			self.clone()
 		} else {

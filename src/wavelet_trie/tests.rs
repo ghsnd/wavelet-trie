@@ -290,4 +290,21 @@ mod tests {
 		assert_ranks(&wt, sequences);
 	}
 
+	#[test]
+	fn access() {
+		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
+		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
+		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
+		let sequences = &[sequence1.copy(), sequence2.copy(), sequence3.copy()];
+		let wt = WaveletTrie::from_sequences(sequences);
+		println!("{:?}", wt);
+		assert_ranks(&wt, sequences);
+		let pos_0_seq = wt.access(0);
+		assert_eq!(sequence1, pos_0_seq);
+		let pos_1_seq = wt.access(1);
+		assert_eq!(sequence2, pos_1_seq);
+		let pos_2_seq = wt.access(2);
+		assert_eq!(sequence3, pos_2_seq);
+	}
+
 }
