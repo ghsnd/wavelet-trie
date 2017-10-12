@@ -7,10 +7,13 @@ mod tests {
 	// inserts the sequences statically in a wavelet trie and checks the
 	// ranks of the sequences at the last position when inserted.
 	fn insert_static_and_check(sequences: &[BitVecWrap]) {
-		let mut sequence_counter = HashMap::new();
 		let wt = WaveletTrie::from_sequences(sequences);
+		assert_ranks(&wt, sequences);
+	}
+
+	fn assert_ranks(wt: &WaveletTrie, sequences: &[BitVecWrap]) {
 		let len = wt.len();
-		assert_eq!(sequences.len(), len);
+		let mut sequence_counter = HashMap::new();
 		for sequence in sequences {
 			let counter = sequence_counter.entry(sequence).or_insert(0);
 			*counter += 1;
@@ -118,9 +121,8 @@ mod tests {
 	fn insert_dynamic_one_sequence() {
 		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
 		let mut wt = WaveletTrie::new();
-		wt.insert(&sequence, 0);
-		println!("{:?}", wt);
-		// TODO: assert; wait for "rank"
+		assert_eq!(Ok(()), wt.insert(&sequence, 0));
+		assert_ranks(&wt, &[sequence])
 	}
 
 	#[test]
@@ -129,13 +131,11 @@ mod tests {
 		let sequence2 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence3 = BitVecWrap::from_bytes(&[0b00011000]);
 		let mut wt = WaveletTrie::new();
-		wt.insert(&sequence1, 0);
-		println!("{:?}", wt);
-		wt.insert(&sequence2, 1);
-		println!("{:?}", wt);
-		wt.insert(&sequence3, 0);
-		println!("{:?}", wt);
-		// TODO: assert; wait for "rank"
+		assert_eq!(Ok(()), wt.insert(&sequence1, 0));
+		assert_eq!(Ok(()), wt.insert(&sequence2, 1));
+		assert_eq!(Ok(()), wt.insert(&sequence3, 0));
+		let sequences = &[sequence1, sequence2, sequence3];
+		assert_ranks(&wt, sequences);
 	}
 
 	#[test]
@@ -175,16 +175,18 @@ mod tests {
 		let s8 = s3.copy();
 
 		let mut wt = WaveletTrie::new();
-		wt.insert(&s1, 0);
-		wt.insert(&s2, 1);
-		wt.insert(&s3, 2);
-		wt.insert(&s4, 3);
-		wt.insert(&s5, 4);
-		wt.insert(&s6, 5);
-		wt.insert(&s7, 6);
-		wt.insert(&s8, 7);
+		assert_eq!(Ok(()), wt.insert(&s1, 0));
+		assert_eq!(Ok(()), wt.insert(&s2, 1));
+		assert_eq!(Ok(()), wt.insert(&s3, 2));
+		assert_eq!(Ok(()), wt.insert(&s4, 3));
+		assert_eq!(Ok(()), wt.insert(&s5, 4));
+		assert_eq!(Ok(()), wt.insert(&s6, 5));
+		assert_eq!(Ok(()), wt.insert(&s7, 6));
+		assert_eq!(Ok(()), wt.insert(&s8, 7));
 		
 		println!("{:?}", wt);
+		let sequences = &[s1, s2, s3, s4, s5, s6, s7, s8];
+		assert_ranks(&wt, sequences);
 	}
 
 	#[test]
@@ -224,15 +226,17 @@ mod tests {
 		let s8 = s3.copy();
 
 		let mut wt = WaveletTrie::new();
-		wt.insert(&s1, 0);
-		wt.insert(&s3, 1);
-		wt.insert(&s5, 2);
-		wt.insert(&s8, 3);
-		wt.insert(&s6, 3);
-		wt.insert(&s4, 2);
-		wt.insert(&s2, 1);
-		wt.insert(&s7, 6);
+		assert_eq!(Ok(()), wt.insert(&s1, 0));
+		assert_eq!(Ok(()), wt.insert(&s3, 1));
+		assert_eq!(Ok(()), wt.insert(&s5, 2));
+		assert_eq!(Ok(()), wt.insert(&s8, 3));
+		assert_eq!(Ok(()), wt.insert(&s6, 3));
+		assert_eq!(Ok(()), wt.insert(&s4, 2));
+		assert_eq!(Ok(()), wt.insert(&s2, 1));
+		assert_eq!(Ok(()), wt.insert(&s7, 6));
 		println!("{:?}", wt);
+		let sequences = &[s1, s2, s3, s4, s5, s6, s7, s8];
+		assert_ranks(&wt, sequences);
 	}
 
 	#[test]
@@ -272,16 +276,18 @@ mod tests {
 		let s8 = s3.copy();
 
 		let mut wt = WaveletTrie::new();
-		wt.append(&s1);
-		wt.append(&s2);
-		wt.append(&s3);
-		wt.append(&s4);
-		wt.append(&s5);
-		wt.append(&s6);
-		wt.append(&s7);
-		wt.append(&s8);
+		assert_eq!(Ok(()), wt.append(&s1));
+		assert_eq!(Ok(()), wt.append(&s2));
+		assert_eq!(Ok(()), wt.append(&s3));
+		assert_eq!(Ok(()), wt.append(&s4));
+		assert_eq!(Ok(()), wt.append(&s5));
+		assert_eq!(Ok(()), wt.append(&s6));
+		assert_eq!(Ok(()), wt.append(&s7));
+		assert_eq!(Ok(()), wt.append(&s8));
 
 		println!("{:?}", wt);
+		let sequences = &[s1, s2, s3, s4, s5, s6, s7, s8];
+		assert_ranks(&wt, sequences);
 	}
 
 }
