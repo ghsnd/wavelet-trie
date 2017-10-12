@@ -66,7 +66,7 @@ impl WaveletTrie {
 	}
 
 	// TODO: rewrite with results!
-	pub fn insert(&mut self, sequence: &BitVecWrap, index: usize) -> Result<usize, &'static str> {
+	pub fn insert(&mut self, sequence: &BitVecWrap, index: usize) -> Result<(), &'static str> {
 		// 1. self.prefix is empty, no children:
 		//     self.prefix = sequence
 		// 2. self.prefix is empty, children:
@@ -97,7 +97,7 @@ impl WaveletTrie {
 			if self.left.is_none() {
 				self.prefix = sequence.copy();
 				self.positions.push(false);
-				return Ok(0);
+				return Ok(());
 
 			// case 2: empty prefix, children
 			} else {
@@ -143,7 +143,7 @@ impl WaveletTrie {
 			} else if &self.prefix == sequence {
 				if self.left.is_none() {
 					self.positions.insert(index, false);
-					return Ok(0);
+					return Ok(());
 				} else {
 					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (2)");
 				}
@@ -219,7 +219,7 @@ impl WaveletTrie {
 				self.positions = BitVecWrap::from_elem(pos_len, bit_self);
 				self.positions.insert(index, bit_seq);
 
-				return Ok(0)
+				return Ok(())
 			}
 		}
 	}
