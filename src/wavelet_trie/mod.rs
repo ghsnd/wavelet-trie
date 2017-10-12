@@ -105,34 +105,7 @@ impl WaveletTrie {
 					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (1)");
 					//Err("The string being inserded is a prefix of a string in the trie, which is not allowed.")
 				} else {
-					// recursively insert sequence minus the first bit in a child determined by the first bit
-					let (bit, suffix) = sequence.different_suffix(0);
-					self.positions.insert(index, bit); 
-
-					// simplify this with clojures?
-					let result = match bit {
-						true => {
-							if let Some(ref mut child) = self.right {
-								let new_pos = self.positions.rank_one(index);
-								child.insert(&suffix, new_pos)
-								// TODO: 
-							} else {
-								Err("The right child has run away!")
-							}
-						},
-						false => {
-							if let Some(ref mut child) = self.left {
-								let new_pos = self.positions.rank_zero(index);
-								child.insert(&suffix, new_pos)
-								// TODO: 
-							} else {
-								Err("The left child has run away!")
-							}
-						}
-					};
-					return result;
-					//return child_to_insert.unwrap().insert(&suffix, 0);	
-					// TODO: re-calculate position before returning the result
+					return self.insert_to_child(sequence, index);
 				}
 			}
 
@@ -153,31 +126,7 @@ impl WaveletTrie {
 				if self.left.is_none() {
 					return Err("A string in the trie The string being inserded is a prefix of a , which is not allowed. (4)");
 				} else {
-					let (bit, suffix) = sequence.different_suffix(self.prefix.len());
-					self.positions.insert(index, bit);
-
-					// simplify this with clojures?
-					let result = match bit {
-						true => {
-							if let Some(ref mut child) = self.right {
-								let new_pos = self.positions.rank_one(index);
-								child.insert(&suffix, new_pos)
-								// TODO: 
-							} else {
-								Err("The right child has run away!")
-							}
-						},
-						false => {
-							if let Some(ref mut child) = self.left {
-								let new_pos = self.positions.rank_zero(index);
-								child.insert(&suffix, new_pos) // TODO: calculate right position
-								// TODO: 
-							} else {
-								Err("The left child has run away!")
-							}
-						}
-					};
-					return result;
+					return self.insert_to_child(sequence, index);
 				}
 			} else {
 				let lcp = sequence.longest_common_prefix(&self.prefix);
@@ -197,7 +146,7 @@ impl WaveletTrie {
 					prefix: suffix_self,
 					positions: original_positions
 				};
-	
+
 				// create the leaf
 				let new_leaf = WaveletTrie {
 					left: None,
@@ -222,6 +171,32 @@ impl WaveletTrie {
 				return Ok(())
 			}
 		}
+	}
+
+	fn insert_to_child(&mut self, sequence: &BitVecWrap, index: usize) -> Result<(), &'static str> {
+		let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+		self.positions.insert(index, bit);
+
+		// simplify this with clojures?
+		let result = match bit {
+			true => {
+				if let Some(ref mut child) = self.right {
+					let new_pos = self.positions.rank_one(index);
+					child.insert(&suffix, new_pos)
+				} else {
+					Err("The right child has run away!")
+				}
+			},
+			false => {
+				if let Some(ref mut child) = self.left {
+					let new_pos = self.positions.rank_zero(index);
+					child.insert(&suffix, new_pos)
+				} else {
+					Err("The left child has run away!")
+				}
+			}
+		};
+		return result;
 	}
 
 	// count the number of occurrences "sequence" (can be a prefix) up to index − 1.
