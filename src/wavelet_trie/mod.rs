@@ -258,6 +258,7 @@ impl WaveletTrie {
 	}
 
 	// retrieve the sequence at the given index
+	// TODO: extend to range of indices.
 	pub fn access(&self, index: usize) -> BitVecWrap {
 		let mut result = self.prefix.copy();
 		if self.left.is_some() {	// if NO children, the position vector doesn't count...
