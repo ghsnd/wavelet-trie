@@ -1,7 +1,7 @@
 use bit_vec_wrap::BitVecWrap;
 use std::vec::Vec;
 
-// see paper:
+// based on the paper:
 // R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
 // strings are assumed prefix-free. This can be solved by appending a terminator symbol at the end of the string.
 
@@ -184,6 +184,8 @@ impl WaveletTrie {
 		}
 	}
 
+	// inserts the non-common suffix of a sequence with the prefix in a child node,
+	// determined by the first bit of the suffix
 	fn insert_to_child(&mut self, sequence: &BitVecWrap, index: usize) -> Result<(), &'static str> {
 		let (bit, suffix) = sequence.different_suffix(self.prefix.len());
 		self.positions.insert(index, bit);
