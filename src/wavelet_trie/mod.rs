@@ -164,7 +164,6 @@ impl WaveletTrie {
 					left: None,
 					right: None,
 					prefix: suffix_seq,
-					//positions : BitVecWrap::from_elem(original_positions.len() /* check this! */, bit_2)
 					positions : BitVecWrap::from_elem(1, false)
 				};
 
@@ -230,7 +229,6 @@ impl WaveletTrie {
 				true => {
 					let (bit, suffix) = sequence.different_suffix(self.prefix.len());
 					match bit {
-						// TODO: rewrite with closures?
 						true => {
 							let new_index = self.positions.rank_one(index);
 							match self.right {
