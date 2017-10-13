@@ -284,6 +284,49 @@ impl WaveletTrie {
 		result
 	}
 
+	// find the position of the occurrence_nr-th given sequnpuence (can be a prefix)
+	// returns None if not found.
+	pub fn select(&self, sequence: &BitVecWrap, occurrence_nr: usize) -> Option<usize> {
+		// find recursively until node where sequence matches or is prefix of self.prefix.
+		// upon return, calculate back the positions of [bit], depending on the value of bit.
+		if sequence.is_empty() || sequence == &self.prefix || sequence.is_prefix_of(&self.prefix) {
+			// OK, found!
+			Some(occurrence_nr)
+		} else if self.prefix.is_prefix_of(sequence) {
+			if self.left.is_none() {
+				// domage, sequence not in trie!
+				None
+			} else {
+				// search further
+				let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+				match bit {
+					true => {
+						if let Some(ref trie) = self.right { // is always true in this case
+							let pos_option = trie.select(&suffix, occurrence_nr);
+							if let Some(pos) = pos_option {
+								let new_pos = self.positions.select(bit, pos);	// TODO: rank is not the right operation here! just find position of pos-th position!
+								return Some(new_pos);
+							}
+						}
+					},
+					false => {
+						if let Some(ref trie) = self.left { // is always true in this case
+							let pos_option = trie.select(&suffix, occurrence_nr);
+							if let Some(pos) = pos_option {
+								let new_pos = self.positions.select(bit, pos);
+								return Some(new_pos);
+							}
+						}
+					}
+				}
+				Some(0)
+			}
+		} else {
+			// domage, sequence not in trie!
+			None
+		}
+	}
+
 }
 
 mod tests;
