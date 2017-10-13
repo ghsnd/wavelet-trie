@@ -124,7 +124,7 @@ impl BitVecWrap {
 		}
 	}
 
-	// Position (index) of occurrence_nr-th occurrence of bit
+	// Position (index) of occurrence_nr-th occurrence of bit. Starts at one!
 	pub fn select(&self, bit: bool, occurrence_nr: usize) -> usize {
 		// TODO OPTIMIZEME: can probably way more efficient with intrinsics, as in rank
 		let mut count = 0;
