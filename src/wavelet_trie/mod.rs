@@ -292,7 +292,7 @@ impl WaveletTrie {
 		// upon return, calculate back the positions of [bit], depending on the value of bit.
 		if sequence.is_empty() || sequence == &self.prefix || sequence.is_prefix_of(&self.prefix) {
 			// OK, found!
-			Some(occurrence_nr)
+			Some(occurrence_nr - 1)
 		} else if self.prefix.is_prefix_of(sequence) {
 			if self.left.is_none() {
 				// domage, sequence not in trie!
@@ -305,7 +305,7 @@ impl WaveletTrie {
 						if let Some(ref trie) = self.right { // is always true in this case
 							let pos_option = trie.select(&suffix, occurrence_nr);
 							if let Some(pos) = pos_option {
-								let new_pos = self.positions.select(bit, pos);	// TODO: rank is not the right operation here! just find position of pos-th position!
+								let new_pos = self.positions.select(bit, pos);
 								return Some(new_pos);
 							}
 						}
