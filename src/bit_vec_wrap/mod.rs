@@ -124,6 +124,19 @@ impl BitVecWrap {
 		}
 	}
 
+	// Position (index) of occurrence_nr-th occurrence of bit
+	pub fn select(&self, bit: bool, occurrence_nr: usize) -> usize {
+		// TODO OPTIMIZEME: can probably way more efficient with intrinsics, as in rank
+		let mut count = 0;
+		let pos = self.bit_vec.iter().position(|x| { 
+			if x == bit {
+				count = count + 1;
+			}
+			count == occurrence_nr
+		});
+		pos.unwrap()
+	}
+
 	pub fn is_empty(&self) -> bool {
 		self.bit_vec.is_empty()
 	}
