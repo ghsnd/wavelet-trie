@@ -304,19 +304,21 @@ impl WaveletTrie {
 					true => {
 						if let Some(ref trie) = self.right { // is always true in this case
 							let pos_option = trie.select(&suffix, occurrence_nr);
-							if let Some(pos) = pos_option {
-								let new_pos = self.positions.select(bit, pos + 1); // pos + 1 due to offset of 1 for occurrence_nr ...
-								return Some(new_pos);
-							}
+							let new_pos = match pos_option {
+								Some(pos) => self.positions.select(bit, pos + 1),
+								None => None
+							};
+							return new_pos;
 						}
 					},
 					false => {
 						if let Some(ref trie) = self.left { // is always true in this case
 							let pos_option = trie.select(&suffix, occurrence_nr);
-							if let Some(pos) = pos_option {
-								let new_pos = self.positions.select(bit, pos + 1);
-								return Some(new_pos);
-							}
+							let new_pos = match pos_option {
+								Some(pos) => self.positions.select(bit, pos + 1),
+								None => None
+							};
+							return new_pos;
 						}
 					}
 				}

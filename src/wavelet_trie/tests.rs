@@ -345,8 +345,25 @@ mod tests {
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s5.copy(), s6.copy(), s7.copy()];
 		let wt = WaveletTrie::from_sequences(sequences);
 
-		assert_eq!(Some(0), wt.rank(&s1, 1));
-		//assert_eq!(0, wt.rank(s1, 1));
+		assert_eq!(Some(0), wt.select(&s1, 1));	// means: the first occurrence of s1 is at index 0!
+		assert_eq!(None, wt.select(&s1, 2));	// there is no more s1 further in the trie
+		assert_eq!(Some(1), wt.select(&s2, 1));	// s2 first occurs at index 1
+		assert_eq!(Some(2), wt.select(&s3, 1));
+		assert_eq!(Some(4), wt.select(&s3, 2));
+		assert_eq!(Some(6), wt.select(&s3, 3));
+		assert_eq!(None, wt.select(&s3, 4));
+		assert_eq!(Some(3), wt.select(&s4, 1));
+		assert_eq!(Some(5), wt.select(&s4, 2));
+		assert_eq!(Some(2), wt.select(&s5, 1));
+		assert_eq!(Some(4), wt.select(&s5, 2));
+		assert_eq!(Some(6), wt.select(&s5, 3));
+		assert_eq!(None, wt.select(&s5, 4));
+		assert_eq!(Some(3), wt.select(&s6, 1));
+		assert_eq!(Some(5), wt.select(&s6, 2));
+		assert_eq!(Some(2), wt.select(&s7, 1));
+		assert_eq!(Some(4), wt.select(&s7, 2));
+		assert_eq!(Some(6), wt.select(&s7, 3));
+		assert_eq!(None, wt.select(&s7, 4));
 	}
 
 }

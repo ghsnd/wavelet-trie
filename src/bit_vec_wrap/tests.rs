@@ -112,21 +112,21 @@ mod tests {
 	#[test]
 	fn select() {
 		let bv = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
-		assert_eq!(0, bv.select(false, 1));
-		assert_eq!(2, bv.select(false, 2));
-		assert_eq!(4, bv.select(false, 3));
-		assert_eq!(6, bv.select(false, 4));
-		assert_eq!(8, bv.select(false, 5));
-		assert_eq!(10, bv.select(false, 6));
-		assert_eq!(12, bv.select(false, 7));
-		assert_eq!(14, bv.select(false, 8));
-		assert_eq!(1, bv.select(true, 1));
-		assert_eq!(3, bv.select(true, 2));
-		assert_eq!(5, bv.select(true, 3));
-		assert_eq!(7, bv.select(true, 4));
-		assert_eq!(9, bv.select(true, 5));
-		assert_eq!(11, bv.select(true, 6));
-		assert_eq!(13, bv.select(true, 7));
-		assert_eq!(15, bv.select(true, 8));
+		assert_eq!(Some(0), bv.select(false, 1));
+		assert_eq!(Some(2), bv.select(false, 2));
+		assert_eq!(Some(4), bv.select(false, 3));
+		assert_eq!(Some(6), bv.select(false, 4));
+		assert_eq!(Some(8), bv.select(false, 5));
+		assert_eq!(Some(10), bv.select(false, 6));
+		assert_eq!(Some(12), bv.select(false, 7));
+		assert_eq!(Some(14), bv.select(false, 8));
+		assert_eq!(Some(1), bv.select(true, 1));
+		assert_eq!(Some(3), bv.select(true, 2));
+		assert_eq!(Some(5), bv.select(true, 3));
+		assert_eq!(Some(7), bv.select(true, 4));
+		assert_eq!(Some(9), bv.select(true, 5));
+		assert_eq!(Some(11), bv.select(true, 6));
+		assert_eq!(Some(13), bv.select(true, 7));
+		assert_eq!(Some(15), bv.select(true, 8));
 	}
 }
