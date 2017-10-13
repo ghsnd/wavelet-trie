@@ -300,29 +300,28 @@ impl WaveletTrie {
 			} else {
 				// search further
 				let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+
+				// closure that is used to calculate the new position.
+				let calc_new_pos = |trie: &WaveletTrie| {
+					let pos_option = trie.select(&suffix, occurrence_nr);
+					match pos_option {
+						Some(pos) => self.positions.select(bit, pos + 1),
+						None => None
+					}
+				};
 				match bit {
 					true => {
 						if let Some(ref trie) = self.right { // is always true in this case
-							let pos_option = trie.select(&suffix, occurrence_nr);
-							let new_pos = match pos_option {
-								Some(pos) => self.positions.select(bit, pos + 1),
-								None => None
-							};
-							return new_pos;
+							return calc_new_pos(trie);
 						}
 					},
 					false => {
 						if let Some(ref trie) = self.left { // is always true in this case
-							let pos_option = trie.select(&suffix, occurrence_nr);
-							let new_pos = match pos_option {
-								Some(pos) => self.positions.select(bit, pos + 1),
-								None => None
-							};
-							return new_pos;
+							return calc_new_pos(trie);
 						}
 					}
 				}
-				Some(0)
+				None
 			}
 		} else {
 			// domage, sequence not in trie!
