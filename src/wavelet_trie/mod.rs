@@ -284,7 +284,7 @@ impl WaveletTrie {
 		result
 	}
 
-	// find the position of the occurrence_nr-th given sequnpuence (can be a prefix)
+	// find the position of the occurrence_nr-th given sequence (can be a prefix)
 	// an occurrence number starts at 1 (a zero-th occurrence makes no sense)
 	// returns None if not found.
 	pub fn select(&self, sequence: &BitVecWrap, occurrence_nr: usize) -> Option<usize> {
