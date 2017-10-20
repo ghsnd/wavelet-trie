@@ -191,10 +191,10 @@ impl WaveletTrie {
 		self.positions.insert(index, bit);
 
 		// simplify this with clojures?
+		let new_pos = self.positions.rank(bit, index);
 		let result = match bit {
 			true => {
 				if let Some(ref mut child) = self.right {
-					let new_pos = self.positions.rank_one(index);
 					child.insert(&suffix, new_pos)
 				} else {
 					Err("The right child has run away!")
@@ -202,7 +202,6 @@ impl WaveletTrie {
 			},
 			false => {
 				if let Some(ref mut child) = self.left {
-					let new_pos = self.positions.rank_zero(index);
 					child.insert(&suffix, new_pos)
 				} else {
 					Err("The left child has run away!")
@@ -230,16 +229,15 @@ impl WaveletTrie {
 			match self.prefix.is_prefix_of(sequence) {
 				true => {
 					let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+					let new_index = self.positions.rank(bit, index);
 					match bit {
 						true => {
-							let new_index = self.positions.rank_one(index);
 							match self.right {
 								Some(ref trie) => trie.rank(&suffix, new_index),
 								None => Some(new_index)
 							}
 						},
 						false => {
-							let new_index = self.positions.rank_zero(index);
 							match self.left {
 								Some(ref trie) => trie.rank(&suffix, new_index),
 								None => Some(new_index)
@@ -264,16 +262,15 @@ impl WaveletTrie {
 		if self.left.is_some() {	// if NO children, the position vector doesn't count...
 			let bit_option = self.positions.get(index);
 			if let Some(bit) = bit_option {
+				let new_index = self.positions.rank(bit, index);
 				result.push(bit);
 				match bit {
 					true => {
-						let new_index = self.positions.rank_one(index);
 						if let Some(ref trie) = self.right {
 							result.append(trie.access(new_index));
 						}
 					},
 					false => {
-						let new_index = self.positions.rank_zero(index);
 						if let Some(ref trie) = self.left {
 							result.append(trie.access(new_index));
 						}
