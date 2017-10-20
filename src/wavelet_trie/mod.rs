@@ -321,11 +321,63 @@ impl WaveletTrie {
 						}
 					}
 				}
+				// should never come here. Maybe panic?
 				None
 			}
 		} else {
 			// domage, sequence not in trie!
 			None
+		}
+	}
+
+	// find the positions of all occurrences of the given sequence (can be prefix)
+	pub fn select_all(&self, sequence: &BitVecWrap) -> Vec<usize> {
+		if sequence.is_empty() || sequence == &self.prefix || sequence.is_prefix_of(&self.prefix) {
+			// found! return vector [0, 1, ... positions.len() - 1]
+			let mut result = Vec::with_capacity(self.positions.len());
+			for i in 0..self.positions.len() {
+				result.push(i);
+			}
+			result
+		} else if self.prefix.is_prefix_of(sequence) {
+			if self.left.is_none() {
+				// domage, sequence not in trie!
+				Vec::new()
+			} else {
+				// search further
+				let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+
+				// closure that is used to calculate the new position.
+				let calc_new_pos = |trie: &WaveletTrie| {
+					let mut all_positions = trie.select_all(&suffix);	// positions is now a Vec
+					for position in all_positions.iter_mut() {
+						let new_position = self.positions.select(bit, *position + 1);
+						match new_position {
+							Some(new_pos) => {*position = new_pos;},
+							None => {panic!("This cannot happen!");},
+						};
+					}
+					all_positions
+				};
+
+				match bit {
+					true => {
+						if let Some(ref trie) = self.right { // is always true in this case
+							return calc_new_pos(trie);
+						}
+					},
+					false => {
+						if let Some(ref trie) = self.left { // is always true in this case
+							return calc_new_pos(trie);
+						}
+					}
+				}
+				// should never come here. Maybe panic?
+				Vec::new()
+			}
+		} else {
+			// domage, sequence not in trie!
+			Vec::new()
 		}
 	}
 

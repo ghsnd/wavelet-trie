@@ -124,6 +124,13 @@ impl BitVecWrap {
 		}
 	}
 
+	pub fn rank(&self, bit: bool, pos: usize) -> usize {
+		match bit {
+			false => self.rank_zero(pos),
+			true => self.rank_one(pos)
+		}
+	}
+
 	// Position (index) of occurrence_nr-th occurrence of bit. Starts at one!
 	pub fn select(&self, bit: bool, occurrence_nr: usize) -> Option<usize> {
 		println!("vec: {:?}, bit: {}, occurence_nr: {}", self.bit_vec, bit, occurrence_nr);

@@ -366,4 +366,53 @@ mod tests {
 		assert_eq!(None, wt.select(&s7, 4));
 	}
 
+		#[test]
+	fn select_all() {
+		// 0001
+		let mut s1 = BitVecWrap::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = BitVecWrap::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = BitVecWrap::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = BitVecWrap::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
+		let wt = WaveletTrie::from_sequences(sequences);
+
+		assert_eq!(vec![0], wt.select_all(&s1));
+		assert_eq!(vec![1], wt.select_all(&s2));
+		assert_eq!(vec![2, 4, 6], wt.select_all(&s3));
+		assert_eq!(vec![3, 5], wt.select_all(&s4));
+		let empty_vec: Vec<usize> = Vec::new();
+		assert_eq!(empty_vec, wt.select_all(&BitVecWrap::from_elem(16, true))); //not in trie
+
+		let mut existing_prefix = BitVecWrap::new();
+		existing_prefix.push(false);
+		existing_prefix.push(false);
+		assert_eq!(vec![0, 1, 3, 5], wt.select_all(&existing_prefix));
+
+		let prefix_zero = BitVecWrap::from_elem(0, false);
+		assert_eq!(vec![0, 1, 2, 3, 4, 5, 6], wt.select_all(&prefix_zero));
+	}
 }
