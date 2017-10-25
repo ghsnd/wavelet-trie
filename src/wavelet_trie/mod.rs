@@ -191,10 +191,10 @@ impl WaveletTrie {
 		self.positions.insert(index, bit);
 
 		// simplify this with clojures?
+		let new_pos = self.positions.rank(bit, index);
 		let result = match bit {
 			true => {
 				if let Some(ref mut child) = self.right {
-					let new_pos = self.positions.rank_one(index);
 					child.insert(&suffix, new_pos)
 				} else {
 					Err("The right child has run away!")
@@ -202,7 +202,6 @@ impl WaveletTrie {
 			},
 			false => {
 				if let Some(ref mut child) = self.left {
-					let new_pos = self.positions.rank_zero(index);
 					child.insert(&suffix, new_pos)
 				} else {
 					Err("The left child has run away!")
@@ -230,16 +229,15 @@ impl WaveletTrie {
 			match self.prefix.is_prefix_of(sequence) {
 				true => {
 					let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+					let new_index = self.positions.rank(bit, index);
 					match bit {
 						true => {
-							let new_index = self.positions.rank_one(index);
 							match self.right {
 								Some(ref trie) => trie.rank(&suffix, new_index),
 								None => Some(new_index)
 							}
 						},
 						false => {
-							let new_index = self.positions.rank_zero(index);
 							match self.left {
 								Some(ref trie) => trie.rank(&suffix, new_index),
 								None => Some(new_index)
@@ -264,16 +262,15 @@ impl WaveletTrie {
 		if self.left.is_some() {	// if NO children, the position vector doesn't count...
 			let bit_option = self.positions.get(index);
 			if let Some(bit) = bit_option {
+				let new_index = self.positions.rank(bit, index);
 				result.push(bit);
 				match bit {
 					true => {
-						let new_index = self.positions.rank_one(index);
 						if let Some(ref trie) = self.right {
 							result.append(trie.access(new_index));
 						}
 					},
 					false => {
-						let new_index = self.positions.rank_zero(index);
 						if let Some(ref trie) = self.left {
 							result.append(trie.access(new_index));
 						}
@@ -284,7 +281,7 @@ impl WaveletTrie {
 		result
 	}
 
-	// find the position of the occurrence_nr-th given sequnpuence (can be a prefix)
+	// find the position of the occurrence_nr-th given sequence (can be a prefix)
 	// an occurrence number starts at 1 (a zero-th occurrence makes no sense)
 	// returns None if not found.
 	pub fn select(&self, sequence: &BitVecWrap, occurrence_nr: usize) -> Option<usize> {
@@ -321,11 +318,63 @@ impl WaveletTrie {
 						}
 					}
 				}
+				// should never come here. Maybe panic?
 				None
 			}
 		} else {
 			// domage, sequence not in trie!
 			None
+		}
+	}
+
+	// find the positions of all occurrences of the given sequence (can be prefix)
+	pub fn select_all(&self, sequence: &BitVecWrap) -> Vec<usize> {
+		if sequence.is_empty() || sequence == &self.prefix || sequence.is_prefix_of(&self.prefix) {
+			// found! return vector [0, 1, ... positions.len() - 1]
+			let mut result = Vec::with_capacity(self.positions.len());
+			for i in 0..self.positions.len() {
+				result.push(i);
+			}
+			result
+		} else if self.prefix.is_prefix_of(sequence) {
+			if self.left.is_none() {
+				// domage, sequence not in trie!
+				Vec::new()
+			} else {
+				// search further
+				let (bit, suffix) = sequence.different_suffix(self.prefix.len());
+
+				// closure that is used to calculate the new position.
+				let calc_new_pos = |trie: &WaveletTrie| {
+					let mut all_positions = trie.select_all(&suffix);	// positions is now a Vec
+					for position in all_positions.iter_mut() {
+						let new_position = self.positions.select(bit, *position + 1);
+						match new_position {
+							Some(new_pos) => {*position = new_pos;},
+							None => {panic!("This cannot happen!");},
+						};
+					}
+					all_positions
+				};
+
+				match bit {
+					true => {
+						if let Some(ref trie) = self.right { // is always true in this case
+							return calc_new_pos(trie);
+						}
+					},
+					false => {
+						if let Some(ref trie) = self.left { // is always true in this case
+							return calc_new_pos(trie);
+						}
+					}
+				}
+				// should never come here. Maybe panic?
+				Vec::new()
+			}
+		} else {
+			// domage, sequence not in trie!
+			Vec::new()
 		}
 	}
 

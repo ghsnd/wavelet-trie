@@ -94,7 +94,7 @@ impl BitVecWrap {
 
 	// Number of ones in the vector before position "pos"
 	// i.e. in [0 .. pos-1]
-	pub fn rank_one(&self, pos: usize) -> usize {
+	fn rank_one(&self, pos: usize) -> usize {
 		if pos > self.bit_vec.len() {
 			panic!("Index out of bounds!");
 		}
@@ -116,11 +116,18 @@ impl BitVecWrap {
 		bit_count
 	}
 
-	pub fn rank_zero(&self, pos: usize) -> usize {
+	fn rank_zero(&self, pos: usize) -> usize {
 		if pos == 0 {
 			pos
 		} else {
 			pos - self.rank_one(pos)
+		}
+	}
+
+	pub fn rank(&self, bit: bool, pos: usize) -> usize {
+		match bit {
+			false => self.rank_zero(pos),
+			true => self.rank_one(pos)
 		}
 	}
 
