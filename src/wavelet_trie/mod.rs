@@ -378,6 +378,14 @@ impl WaveletTrie {
 		}
 	}
 
+	pub fn append_str(&mut self, text: &str) -> Result<(), &'static str> {
+		let text_bytes = text.as_bytes();
+		let mut text_bitvec = BitVecWrap::from_bytes(text_bytes);
+		let end_symbol = BitVecWrap::from_bytes(&[0b00000000]);
+		text_bitvec.append(end_symbol);
+		self.append(&text_bitvec)
+	}
+
 }
 
 mod tests;

@@ -415,4 +415,12 @@ mod tests {
 		let prefix_zero = BitVecWrap::from_elem(0, false);
 		assert_eq!(vec![0, 1, 2, 3, 4, 5, 6], wt.select_all(&prefix_zero));
 	}
+
+	#[test]
+	fn append_str() {
+		let mut wt = WaveletTrie::new();
+		wt.append_str("Dit is een test");
+		wt.append_str("Dit is een teletubbie");
+		println!("{:?}", wt);
+	}
 }
