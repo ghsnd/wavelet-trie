@@ -309,7 +309,7 @@ mod tests {
 
 	#[test]
 	fn select() {
-				// 0001
+		// 0001
 		let mut s1 = BitVecWrap::new();
 		s1.push(false);
 		s1.push(false);
