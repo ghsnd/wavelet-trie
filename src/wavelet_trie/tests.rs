@@ -394,8 +394,8 @@ mod tests {
 	#[test]
 	fn append_str() {
 		let mut wt = WaveletTrie::new();
-		wt.append_str("Dit is een test");
-		wt.append_str("Dit is een teletubbie");
+		assert_eq!(Ok(()), wt.append_str("Dit is een test"));
+		assert_eq!(Ok(()), wt.append_str("Dit is een teletubbie"));
 		println!("{:?}", wt);
 	}
 

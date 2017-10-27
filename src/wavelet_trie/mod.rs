@@ -449,6 +449,7 @@ impl WaveletTrie {
 		}
 	}
 
+	// appends a string to the trie
 	pub fn append_str(&mut self, text: &str) -> Result<(), &'static str> {
 		let text_bytes = text.as_bytes();
 		let mut text_bitvec = BitVecWrap::from_bytes(text_bytes);
