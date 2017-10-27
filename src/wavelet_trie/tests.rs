@@ -398,4 +398,14 @@ mod tests {
 		wt.append_str("Dit is een teletubbie");
 		println!("{:?}", wt);
 	}
+
+	#[test]
+	fn delete() {
+		let s1 = BitVecWrap::from_bytes(&[0b00010011]);
+		let s2 = BitVecWrap::from_bytes(&[0b00010110]);
+		let s3 = BitVecWrap::from_bytes(&[0b00010111]);
+		let wt = WaveletTrie::from_sequences(&[s1, s2, s3]);
+		println!("{:?}", wt);
+	}
+
 }
