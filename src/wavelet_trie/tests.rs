@@ -85,23 +85,18 @@ mod tests {
 		s4.push(false);
 		s4.push(false);
 
-		let s5 = s3.copy();
-		let s6 = s4.copy();
-		let s7 = s3.copy();
-		let s8 = s3.copy();
-
-		let sequences = &[s1, s2, s3, s4, s5, s6, s7];
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
 		let mut wt = WaveletTrie::new();
 		wt.insert_static(sequences);
 		println!("{:?}", wt);
 
-		assert_eq!(Some(0), wt.rank(&s8, 0));
-		assert_eq!(Some(0), wt.rank(&s8, 2));
-		assert_eq!(Some(1), wt.rank(&s8, 3));
-		assert_eq!(Some(1), wt.rank(&s8, 4));
-		assert_eq!(Some(2), wt.rank(&s8, 5));
-		assert_eq!(Some(2), wt.rank(&s8, 6));
-		assert_eq!(Some(3), wt.rank(&s8, 7));
+		assert_eq!(Some(0), wt.rank(&s3, 0));
+		assert_eq!(Some(0), wt.rank(&s3, 2));
+		assert_eq!(Some(1), wt.rank(&s3, 3));
+		assert_eq!(Some(1), wt.rank(&s3, 4));
+		assert_eq!(Some(2), wt.rank(&s3, 5));
+		assert_eq!(Some(2), wt.rank(&s3, 6));
+		assert_eq!(Some(3), wt.rank(&s3, 7));
 
 		let mut seq_0 = BitVecWrap::new();
 		seq_0.push(false);
@@ -169,23 +164,18 @@ mod tests {
 		s4.push(false);
 		s4.push(false);
 
-		let s5 = s3.copy();
-		let s6 = s4.copy();
-		let s7 = s3.copy();
-		let s8 = s3.copy();
-
 		let mut wt = WaveletTrie::new();
 		assert_eq!(Ok(()), wt.insert(&s1, 0));
 		assert_eq!(Ok(()), wt.insert(&s2, 1));
 		assert_eq!(Ok(()), wt.insert(&s3, 2));
 		assert_eq!(Ok(()), wt.insert(&s4, 3));
-		assert_eq!(Ok(()), wt.insert(&s5, 4));
-		assert_eq!(Ok(()), wt.insert(&s6, 5));
-		assert_eq!(Ok(()), wt.insert(&s7, 6));
-		assert_eq!(Ok(()), wt.insert(&s8, 7));
+		assert_eq!(Ok(()), wt.insert(&s3, 4));
+		assert_eq!(Ok(()), wt.insert(&s4, 5));
+		assert_eq!(Ok(()), wt.insert(&s3, 6));
+		assert_eq!(Ok(()), wt.insert(&s3, 7));
 		
 		println!("{:?}", wt);
-		let sequences = &[s1, s2, s3, s4, s5, s6, s7, s8];
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
 		assert_ranks(&wt, sequences);
 	}
 
@@ -220,22 +210,17 @@ mod tests {
 		s4.push(false);
 		s4.push(false);
 
-		let s5 = s3.copy();
-		let s6 = s4.copy();
-		let s7 = s3.copy();
-		let s8 = s3.copy();
-
 		let mut wt = WaveletTrie::new();
 		assert_eq!(Ok(()), wt.insert(&s1, 0));
 		assert_eq!(Ok(()), wt.insert(&s3, 1));
-		assert_eq!(Ok(()), wt.insert(&s5, 2));
-		assert_eq!(Ok(()), wt.insert(&s8, 3));
-		assert_eq!(Ok(()), wt.insert(&s6, 3));
+		assert_eq!(Ok(()), wt.insert(&s3, 2));
+		assert_eq!(Ok(()), wt.insert(&s3, 3));
+		assert_eq!(Ok(()), wt.insert(&s4, 3));
 		assert_eq!(Ok(()), wt.insert(&s4, 2));
 		assert_eq!(Ok(()), wt.insert(&s2, 1));
-		assert_eq!(Ok(()), wt.insert(&s7, 6));
+		assert_eq!(Ok(()), wt.insert(&s3, 6));
 		println!("{:?}", wt);
-		let sequences = &[s1, s2, s3, s4, s5, s6, s7, s8];
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
 		assert_ranks(&wt, sequences);
 	}
 
@@ -270,23 +255,18 @@ mod tests {
 		s4.push(false);
 		s4.push(false);
 
-		let s5 = s3.copy();
-		let s6 = s4.copy();
-		let s7 = s3.copy();
-		let s8 = s3.copy();
-
 		let mut wt = WaveletTrie::new();
 		assert_eq!(Ok(()), wt.append(&s1));
 		assert_eq!(Ok(()), wt.append(&s2));
 		assert_eq!(Ok(()), wt.append(&s3));
 		assert_eq!(Ok(()), wt.append(&s4));
-		assert_eq!(Ok(()), wt.append(&s5));
-		assert_eq!(Ok(()), wt.append(&s6));
-		assert_eq!(Ok(()), wt.append(&s7));
-		assert_eq!(Ok(()), wt.append(&s8));
+		assert_eq!(Ok(()), wt.append(&s3));
+		assert_eq!(Ok(()), wt.append(&s4));
+		assert_eq!(Ok(()), wt.append(&s3));
+		assert_eq!(Ok(()), wt.append(&s3));
 
 		println!("{:?}", wt);
-		let sequences = &[s1, s2, s3, s4, s5, s6, s7, s8];
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
 		assert_ranks(&wt, sequences);
 	}
 
@@ -338,11 +318,7 @@ mod tests {
 		s4.push(false);
 		s4.push(false);
 
-		let s5 = s3.copy();
-		let s6 = s4.copy();
-		let s7 = s3.copy();
-
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s5.copy(), s6.copy(), s7.copy()];
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
 		let wt = WaveletTrie::from_sequences(sequences);
 
 		assert_eq!(Some(0), wt.select(&s1, 1));	// means: the first occurrence of s1 is at index 0!
@@ -354,16 +330,16 @@ mod tests {
 		assert_eq!(None, wt.select(&s3, 4));
 		assert_eq!(Some(3), wt.select(&s4, 1));
 		assert_eq!(Some(5), wt.select(&s4, 2));
-		assert_eq!(Some(2), wt.select(&s5, 1));
-		assert_eq!(Some(4), wt.select(&s5, 2));
-		assert_eq!(Some(6), wt.select(&s5, 3));
-		assert_eq!(None, wt.select(&s5, 4));
-		assert_eq!(Some(3), wt.select(&s6, 1));
-		assert_eq!(Some(5), wt.select(&s6, 2));
-		assert_eq!(Some(2), wt.select(&s7, 1));
-		assert_eq!(Some(4), wt.select(&s7, 2));
-		assert_eq!(Some(6), wt.select(&s7, 3));
-		assert_eq!(None, wt.select(&s7, 4));
+		assert_eq!(Some(2), wt.select(&s3, 1));
+		assert_eq!(Some(4), wt.select(&s3, 2));
+		assert_eq!(Some(6), wt.select(&s3, 3));
+		assert_eq!(None, wt.select(&s3, 4));
+		assert_eq!(Some(3), wt.select(&s4, 1));
+		assert_eq!(Some(5), wt.select(&s4, 2));
+		assert_eq!(Some(2), wt.select(&s3, 1));
+		assert_eq!(Some(4), wt.select(&s3, 2));
+		assert_eq!(Some(6), wt.select(&s3, 3));
+		assert_eq!(None, wt.select(&s3, 4));
 	}
 
 		#[test]
