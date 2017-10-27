@@ -86,8 +86,7 @@ mod tests {
 		s4.push(false);
 
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
-		let mut wt = WaveletTrie::new();
-		wt.insert_static(sequences);
+		let wt = WaveletTrie::from_sequences(sequences);
 		println!("{:?}", wt);
 
 		assert_eq!(Some(0), wt.rank(&s3, 0));
