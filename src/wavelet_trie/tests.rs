@@ -404,8 +404,20 @@ mod tests {
 		let s1 = BitVecWrap::from_bytes(&[0b00010011]);
 		let s2 = BitVecWrap::from_bytes(&[0b00010110]);
 		let s3 = BitVecWrap::from_bytes(&[0b00010111]);
-		let wt = WaveletTrie::from_sequences(&[s1, s2, s3]);
+		let mut wt = WaveletTrie::from_sequences(&[s1.copy(), s2.copy(), s3.copy()]);
 		println!("{:?}", wt);
+		wt.delete(1);
+		assert_eq!(Some(1), wt.rank(&s1, 1));
+		assert_eq!(Some(1), wt.rank(&s3, 2));
+		assert_eq!(None, wt.rank(&s2, 2));
+		println!("{:?}", wt);
+		wt.delete(1);
+		println!("{:?}", wt);
+		assert_eq!(Some(1), wt.rank(&s1, 1));
+		assert_eq!(None, wt.rank(&s3, 1));
+		wt.delete(0);
+		println!("{:?}", wt);
+		assert_eq!(None, wt.rank(&s1, 0));
 	}
 
 }

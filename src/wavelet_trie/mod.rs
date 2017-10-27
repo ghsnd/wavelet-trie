@@ -214,7 +214,9 @@ impl WaveletTrie {
 	// count the number of occurrences "sequence" (can be a prefix) up to index − 1.
 	// returns None if sequence does not occur
 	pub fn rank(&self, sequence: &BitVecWrap, index: usize) -> Option<usize> {
-		if sequence.is_empty() || sequence == &self.prefix {
+		if self.prefix.is_empty() && self.positions.is_empty() {
+			None
+		} else if sequence.is_empty() || sequence == &self.prefix {
 			Some(index)
 		} else if sequence.len() < self.prefix.len() {
 			// sequence has to be a prefix of "prefix"
@@ -256,7 +258,6 @@ impl WaveletTrie {
 	}
 
 	// retrieve the sequence at the given index
-	// TODO: extend to range of indices.
 	pub fn access(&self, index: usize) -> BitVecWrap {
 		let mut result = self.prefix.copy();
 		if self.left.is_some() {	// if NO children, the position vector doesn't count...
@@ -375,6 +376,76 @@ impl WaveletTrie {
 		} else {
 			// domage, sequence not in trie!
 			Vec::new()
+		}
+	}
+
+	pub fn delete(&mut self, index: usize) {
+		println!("delete {}", index);
+		let bit_option = self.positions.get(index);
+		if let Some(bit) = bit_option {
+			let new_pos = self.positions.rank(bit, index);
+			match bit {
+				true => {
+					println!("recurse into right child");
+					let mut delete_child = false;
+					if let Some(ref mut child) = self.right {
+						child.delete(new_pos);
+						if child.len() == 0 {	// this would be the leaf node
+							delete_child = true;
+						}
+					}
+					if delete_child {
+						println!("right child will be deleted");
+						self.right = None;
+						self.prefix.push(!bit);
+						// merge other child with this node
+						let mut new_left: Option<Box<WaveletTrie>> = None;
+						let mut new_right: Option<Box<WaveletTrie>> = None;
+						if let Some(ref mut child) = self.left {
+							self.prefix.append(child.prefix.copy());
+							new_left = child.left.take();
+							new_right = child.right.take();
+						}
+						self.left = new_left;
+						self.right = new_right;
+					}
+				},
+				false => {
+					println!("recurse into left child");
+					let mut delete_child = false;
+					if let Some(ref mut child) = self.left {
+						child.delete(new_pos);
+						if child.len() == 0 {	// this would be the leaf node
+							delete_child = true;
+						}
+					}
+					if delete_child {
+						println!("left child will be deleted");
+						self.left = None;
+						self.prefix.push(!bit);
+						// merge other child with this node
+						let mut new_left: Option<Box<WaveletTrie>> = None;
+						let mut new_right: Option<Box<WaveletTrie>> = None;
+						if let Some(ref mut child) = self.right {
+							self.prefix.append(child.prefix.copy());
+							new_left = child.left.take();
+							new_right = child.right.take();
+						}
+						self.left = new_left;
+						self.right = new_right;
+					}
+				}
+			}
+			self.positions.delete(index);
+			if self.len() == 0 {
+				// the trie is in fact empty!
+				self.prefix = BitVecWrap::new();
+			}
+			if self.left.is_none() { // if no children, set the positions all to zero
+				self.positions.set_none();
+			}
+		} else {
+			panic!("This is not possible!")
 		}
 	}
 

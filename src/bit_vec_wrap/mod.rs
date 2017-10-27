@@ -223,6 +223,20 @@ impl BitVecWrap {
 		copy
 	}
 
+	pub fn all(&self) -> bool {
+		self.bit_vec.all()
+	}
+
+	pub fn none(&self) -> bool {
+		self.bit_vec.none()
+	}
+
+	// set all bits to 0
+	pub fn set_none(&mut self) {
+		self.bit_vec.set_all();
+		self.bit_vec.negate();
+	}
+
 }
 
 mod tests;
