@@ -51,4 +51,4 @@
 /// ```
 
 pub mod wavelet_trie;
-mod bit_vec_wrap;
+pub mod bit_vec_wrap;
