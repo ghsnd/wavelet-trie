@@ -21,3 +21,4 @@ Compressed Space_. Proceedings of the ACM SIGACT-SIGMOD-SIGART Symposium on Prin
 * Exact count & search
 * Helper methods to work with texts.
 * Range methods
+* Many optimisations!
