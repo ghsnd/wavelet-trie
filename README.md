@@ -3,7 +3,7 @@
 A wavelet trie implementation in Rust, based on the paper of Grossi et al [1] ([link](https://arxiv.org/abs/1204.3581)).
 
 In short, it is a succinct data structure that allows fast prefix-search on _sequences_ of binary strings.
-Note that the strings have to be prefix-free, i.e., no string can be a prefix of another. Append a unique bit sequence
+Note that the strings have to be prefix-free, i.e., no string can be a prefix of another. Append a terminator symbol
 to each string to avoid this problem. 
 
 Documentation and examples are coming up in the near future. Until then, take a look at
