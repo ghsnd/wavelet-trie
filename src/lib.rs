@@ -44,10 +44,27 @@
 ///
 /// # Examples
 ///
-/// Creating a wavelet trie
+/// Creating a wavelet trie from 'static' binary content
 ///
 /// ```rust
-/// let mut wt = WaveletTrie::new();
+/// use wavelet_trie::bit_vec_wrap::BitVecWrap;
+///	use wavelet_trie::wavelet_trie::WaveletTrie;
+///
+/// // We start with some binary sequences to put into the wavelet trie
+/// let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
+/// let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
+/// let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
+/// let sequence4 = BitVecWrap::from_bytes(&[0b00100011, 0b00000001]);
+///
+/// // Here we create a wavelet trie from these sequences
+/// let wt = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3, sequence4]);
+///
+/// // Let's see at which positions prefix '001' occurs (should be 2 and 3).
+/// let mut prefix_001 = BitVecWrap::new();
+/// prefix_001.push(false);
+/// prefix_001.push(false);
+/// prefix_001.push(true);
+/// assert_eq!(vec![2, 3], wt.select_all(&prefix_001));
 /// ```
 
 pub mod wavelet_trie;
