@@ -1,4 +1,5 @@
 # Wavelet trie
+[![Build Status](https://travis-ci.org/ghsnd/wavelet-trie.svg?branch=master)](https://travis-ci.org/ghsnd/wavelet-trie)
 
 A wavelet trie implementation in Rust, based on the paper by Grossi et al. [1] ([link](https://arxiv.org/abs/1204.3581)).
 
