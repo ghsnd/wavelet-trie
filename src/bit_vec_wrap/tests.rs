@@ -110,6 +110,27 @@ mod tests {
 	}
 
 	#[test]
+	fn is_prefix_of_long() {
+		let mut bv1 = BitVecWrap::from_bytes(&[0b10000010, 0b10001100, 0b10010010, 0b01000000, 0b10000010, 0b11101110, 0b11000010, 0b11100100, 0b11001000, 0b01000100, 0b10000000, 0b11001010, 0b11011100, 0b01000000, 0b01011100]);// 0000000*/]);
+		bv1.push(false);
+		bv1.push(false);
+		bv1.push(false);
+		bv1.push(false);
+		bv1.push(false);
+		bv1.push(false);
+		bv1.push(false);
+		let mut bv2 = BitVecWrap::from_bytes(&[0b10000010, 0b10001100, 0b10010010, 0b01000001, 0b10100001, 0b01111011, 0b10100001, 0b01100001, 0b10100001, 0b01100111, 0b10100011, 0b00000001, 0b10100001, 0b01100001, 0b10100001, 0b01101001, 0b10100001, 0b01100000, 0b01000100, 0b10000000, 0b11100110, 0b11100100, 0b01000000, 0b01011100]); //0000000*/]);
+		bv2.push(false);
+		bv2.push(false);
+		bv2.push(false);
+		bv2.push(false);
+		bv2.push(false);
+		bv2.push(false);
+		bv2.push(false);
+		assert_eq!(false, bv1.is_prefix_of(&bv2));
+	}
+
+	#[test]
 	fn select() {
 		let bv = BitVecWrap::from_bytes(&[0b01010101, 0b01010101]);
 		assert_eq!(Some(0), bv.select(false, 1));

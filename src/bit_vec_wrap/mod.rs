@@ -161,21 +161,36 @@ impl BitVecWrap {
 		self.bit_vec.to_bytes()
 	}
 
-	// returns true if "self" is a prefix of "other". Assumes self.len() <= other.len()!
+	// returns true if "self" is a prefix of "other".
 	pub fn is_prefix_of(&self, other: &BitVecWrap) -> bool {
-		/*let bytes_self = &self.to_bytes()[..];	// convert to slice
-		let length = bytes_self.len();
-		let bytes_other = &other.to_bytes()[0..length];
-		bytes_self == bytes_other*/
-		let mut index = 0;
-		let mut same = true;
-		while same && index < self.len() {
-			if self.get(index) != other.get(index) {
-				same = false;
-			}
-			index = index + 1;
+		if self.len() > other.len() {
+			return false;
 		}
-		same
+		let self_iter = self.bit_vec.blocks();
+		let other_iter = other.bit_vec.blocks();
+		let zipped_iter = self_iter.zip(other_iter);
+		let mut block_counter = 1;
+		for block_tuple in zipped_iter {
+			//println!("bits1: {:?}, bits2: {:?}", self.bit_vec, other.bit_vec);
+			let b1 = block_tuple.0;
+			let b2 = block_tuple.1;
+			if b1 != b2 {
+				if block_counter != self.len() / 32 + 1 { // not last block
+					return false;
+				}
+				//println!(" b1:{} - b2:{}", b1, b2);
+				let remainder = 32 - self.len() % 32;
+				if remainder == 32 {
+					return false;
+				}
+				//println!(" rem:{}", remainder);
+				let b2_shift = b2 << remainder >> remainder;
+				//println!(" b2_shift:{}", b2_shift);
+				return b2_shift == b1
+			}
+			block_counter += 1;
+		}
+		true
 	}
 
 	// get the <common prefix> part of <common prefix><different bit><different suffix>
