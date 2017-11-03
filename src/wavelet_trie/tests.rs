@@ -176,6 +176,7 @@ mod tests {
 		println!("{:?}", wt);
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
 		assert_ranks(&wt, sequences);
+		wt.print_stats();
 	}
 
 	#[test]

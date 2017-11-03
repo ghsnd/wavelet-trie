@@ -73,8 +73,13 @@ impl WaveletTrie {
 	}
 
 	pub fn print_stats(&self) {
-		println!("prefix len   : {}", self.prefix.len());
-		println!("positions len: {}", self.positions.len());
+		println!("prefix len: {}\tpositions len: {}", self.prefix.len(), self.positions.len());
+		if let Some(ref child) = self.left {
+			child.print_stats();
+		}
+		if let Some(ref child) = self.right {
+			child.print_stats();
+		}
 	}
 
 	// append a sequence to the trie at last position
