@@ -392,11 +392,20 @@ mod tests {
 	}
 
 	#[test]
-	fn append_str() {
+	fn str_ops() {
 		let mut wt = WaveletTrie::new();
 		assert_eq!(Ok(()), wt.append_str("Dit is een test"));
 		assert_eq!(Ok(()), wt.append_str("Dit is een teletubbie"));
 		println!("{:?}", wt);
+		assert_eq!(Some(2), wt.rank_str("Dit is", 2));
+		assert_eq!(None, wt.rank_str("st", 2));
+		assert_eq!(Some(1), wt.rank_str("Dit is een tele", 2));
+		assert_eq!(String::from("Dit is een test"), wt.access_str(0).unwrap());
+		assert_eq!(String::from("Dit is een teletubbie"), wt.access_str(1).unwrap());
+		assert_eq!(Some(0), wt.select_str("Dit is een test", 1));
+		assert_eq!(Some(1), wt.select_str("Dit is een teletubbie", 1));
+		assert_eq!(Some(2), wt.select_str("Dit is een te", 1));
+		assert_eq!(vec![0, 1], wt.select_all_str("Dit is een"));
 	}
 
 	#[test]

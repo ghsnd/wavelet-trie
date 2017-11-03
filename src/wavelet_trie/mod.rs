@@ -1,5 +1,6 @@
 use bit_vec_wrap::BitVecWrap;
 use std::vec::Vec;
+use std::string::FromUtf8Error;
 
 // based on the paper:
 // R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
@@ -451,11 +452,52 @@ impl WaveletTrie {
 
 	// appends a string to the trie
 	pub fn append_str(&mut self, text: &str) -> Result<(), &'static str> {
+		self.append(&Self::text_to_bitvec(text))
+	}
+
+	// count the number of occurrences "text" (can be a prefix) up to index − 1.
+	// returns None if the string does not occur
+	pub fn rank_str(&self, text: &str, index: usize) -> Option<usize> {
+		let sequence = BitVecWrap::from_bytes(text.as_bytes());
+		self.rank(&sequence, index)
+	}
+
+	// retrieve the string at the given index
+	pub fn access_str(&self, index: usize) -> Result<String, FromUtf8Error> {
+		let sequence = self.access(index);
+		Self::bitvec_to_text(&sequence)
+	}
+
+	// find the position of the occurrence_nr-th given string (can be a prefix)
+	// an occurrence number starts at 1 (a zero-th occurrence makes no sense)
+	// returns None if not found.
+	pub fn select_str(&self, text: &str, occurrence_nr: usize) -> Option<usize> {
+		let sequence = BitVecWrap::from_bytes(text.as_bytes());
+		self.select(&sequence, occurrence_nr)
+	}
+
+	fn text_to_bitvec(text: &str) -> BitVecWrap {
 		let text_bytes = text.as_bytes();
 		let mut text_bitvec = BitVecWrap::from_bytes(text_bytes);
+		// add the terminator!
 		let end_symbol = BitVecWrap::from_bytes(&[0b00000000]);
 		text_bitvec.append(end_symbol);
-		self.append(&text_bitvec)
+		text_bitvec
+	}
+
+	// find the positions of all occurrences of the given sequence (can be prefix)
+	pub fn select_all_str(&self, text: &str) -> Vec<usize> {
+		let sequence = BitVecWrap::from_bytes(text.as_bytes());
+		self.select_all(&sequence)
+	}
+
+	fn bitvec_to_text(sequence: &BitVecWrap) -> Result<String, FromUtf8Error> {
+		println!("sequence: {:?}", sequence);
+		let mut bytes = sequence.to_bytes();
+		println!("bytes   : {:?}", bytes);
+		// destroy the terminator!
+		bytes.pop();
+		String::from_utf8(bytes)
 	}
 
 }
