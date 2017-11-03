@@ -406,6 +406,7 @@ mod tests {
 		assert_eq!(Some(1), wt.select_str("Dit is een teletubbie", 1));
 		assert_eq!(Some(1), wt.select_str("Dit is een te", 2));
 		assert_eq!(vec![0, 1], wt.select_all_str("Dit is een"));
+		wt.print_stats();
 	}
 
 	#[test]

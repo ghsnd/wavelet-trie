@@ -72,6 +72,11 @@ impl WaveletTrie {
 		}
 	}
 
+	pub fn print_stats(&self) {
+		println!("prefix len   : {}", self.prefix.len());
+		println!("positions len: {}", self.positions.len());
+	}
+
 	// append a sequence to the trie at last position
 	pub fn append(&mut self, sequence: &BitVecWrap) -> Result<(), &'static str> {
 		let index = self.positions.len();
@@ -381,13 +386,11 @@ impl WaveletTrie {
 	}
 
 	pub fn delete(&mut self, index: usize) {
-		println!("delete {}", index);
 		let bit_option = self.positions.get(index);
 		if let Some(bit) = bit_option {
 			let new_pos = self.positions.rank(bit, index);
 			match bit {
 				true => {
-					println!("recurse into right child");
 					let mut delete_child = false;
 					if let Some(ref mut child) = self.right {
 						child.delete(new_pos);
@@ -396,7 +399,6 @@ impl WaveletTrie {
 						}
 					}
 					if delete_child {
-						println!("right child will be deleted");
 						self.right = None;
 						self.prefix.push(!bit);
 						// merge other child with this node
@@ -412,7 +414,6 @@ impl WaveletTrie {
 					}
 				},
 				false => {
-					println!("recurse into left child");
 					let mut delete_child = false;
 					if let Some(ref mut child) = self.left {
 						child.delete(new_pos);
@@ -421,7 +422,6 @@ impl WaveletTrie {
 						}
 					}
 					if delete_child {
-						println!("left child will be deleted");
 						self.left = None;
 						self.prefix.push(!bit);
 						// merge other child with this node
