@@ -492,9 +492,7 @@ impl WaveletTrie {
 	}
 
 	fn bitvec_to_text(sequence: &BitVecWrap) -> Result<String, FromUtf8Error> {
-		println!("sequence: {:?}", sequence);
 		let mut bytes = sequence.to_bytes();
-		println!("bytes   : {:?}", bytes);
 		// destroy the terminator!
 		bytes.pop();
 		String::from_utf8(bytes)

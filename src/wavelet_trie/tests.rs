@@ -404,7 +404,7 @@ mod tests {
 		assert_eq!(String::from("Dit is een teletubbie"), wt.access_str(1).unwrap());
 		assert_eq!(Some(0), wt.select_str("Dit is een test", 1));
 		assert_eq!(Some(1), wt.select_str("Dit is een teletubbie", 1));
-		assert_eq!(Some(2), wt.select_str("Dit is een te", 1));
+		assert_eq!(Some(1), wt.select_str("Dit is een te", 2));
 		assert_eq!(vec![0, 1], wt.select_all_str("Dit is een"));
 	}
 
