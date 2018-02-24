@@ -1,3 +1,6 @@
+extern crate dyn_bit_vec;
+
+use self::dyn_bit_vec::dyn_bit_vec::DBVec;
 use bit_vec_wrap::BitVecWrap;
 use std::vec::Vec;
 use std::string::FromUtf8Error;
@@ -10,7 +13,9 @@ use std::string::FromUtf8Error;
 #[derive(Debug)]
 pub struct WaveletTrie {
 	prefix: BitVecWrap,               // α in the literature
+	prefix_d: DBVec,                  // α in the literature
 	positions: BitVecWrap,            // β in the literature
+	positions_d: DBVec,               // β in the literature
 	left: Option<Box<WaveletTrie>>,   // left subtrie, if any
 	right: Option<Box<WaveletTrie>>   // right subtrie, if any
 
@@ -24,7 +29,9 @@ impl WaveletTrie {
 			left: None,
 			right: None,
 			prefix: BitVecWrap::new(),
-			positions: BitVecWrap::new()
+			prefix_d: DBVec::new(),
+			positions: BitVecWrap::new(),
+			positions_d: DBVec::new()
 		}
 	}
 
@@ -33,6 +40,8 @@ impl WaveletTrie {
 		wavelet_trie.insert_static(sequences);
 		wavelet_trie
 	}
+
+	// TODO pub fn from_sequences(sequences: &[BitVecWrap]) -> Self {}
 
 	fn insert_static(&mut self, sequences: &[BitVecWrap]) {
 		if !sequences.is_empty() {
@@ -68,6 +77,19 @@ impl WaveletTrie {
 				right_child.insert_static(&right_sequences);
 				self.left = Some(Box::new(left_child));
 				self.right = Some(Box::new(right_child));
+			}
+		}
+	}
+
+	fn insert_static_d(&mut self, sequences: &[DBVec]) {
+		if !sequences.is_empty() {
+			let first_sequence = &sequences[0];
+			let all_equal = sequences.iter().all( |current_sequence| current_sequence == first_sequence);
+			if all_equal {
+				self.prefix_d = first_sequence.clone();
+				self.positions_d = DBVec::from_elem(sequences.len(), false);
+			} else {
+				// TODO
 			}
 		}
 	}
@@ -169,7 +191,9 @@ impl WaveletTrie {
 					left: original_left,
 					right: original_right,
 					prefix: suffix_self,
-					positions: original_positions
+					prefix_d: DBVec::new(),	// TODO
+					positions: original_positions,
+					positions_d: DBVec::new() // TODO
 				};
 
 				// create the leaf
@@ -177,7 +201,9 @@ impl WaveletTrie {
 					left: None,
 					right: None,
 					prefix: suffix_seq,
-					positions : BitVecWrap::from_elem(1, false)
+					prefix_d: DBVec::new(),	// TODO
+					positions : BitVecWrap::from_elem(1, false),
+					positions_d: DBVec::new() // TODO
 				};
 
 				// make this node the new node
