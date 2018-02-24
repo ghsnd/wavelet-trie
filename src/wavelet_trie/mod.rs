@@ -74,6 +74,8 @@ impl WaveletTrie {
 
 	pub fn print_stats(&self) {
 		println!("prefix len: {}\tpositions len: {}", self.prefix.len(), self.positions.len());
+		println!("prefix: {:?}", self.prefix);
+		println!("positions: {:?}", self.positions);
 		if let Some(ref child) = self.left {
 			child.print_stats();
 		}

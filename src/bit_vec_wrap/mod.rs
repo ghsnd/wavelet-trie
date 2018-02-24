@@ -203,19 +203,13 @@ impl BitVecWrap {
 		} else {
 			// OPTIMIZEME
 			let mut new_bit_vec = BitVecWrap::new();
-			let mut done = false;
-			let mut index = 0;
-			while index < self.len() && index < other.len() && !done {
-				if let Some(bit_one) = self.get(index) {
-					if let Some(bit_two) = other.get(index) {
-						if bit_one == bit_two {
-							new_bit_vec.push(bit_one);
-						} else {
-							done = true;
-						}
-					}
+			let zipped_iter = self.bit_vec.iter().zip(other.bit_vec.iter());
+			for bit_pair in zipped_iter {
+				if bit_pair.0 == bit_pair.1 {
+					new_bit_vec.push(bit_pair.0);
+				} else {
+					break
 				}
-				index = index + 1;
 			}
 			new_bit_vec
 		}
@@ -235,6 +229,16 @@ impl BitVecWrap {
 			copy.push(bit);
 		}
 		copy
+/*		let mut copy_bitvec = BitVec::new();
+		unsafe {
+			copy_bitvec.set_len(self.len());
+			let copy_storage = copy_bitvec.storage_mut();
+			for block in self.bit_vec.storage() {
+				copy_storage.push(*block);
+			}
+			//copy_storage = self.bit_vec.storage()[..];
+		}
+		BitVecWrap {bit_vec: copy_bitvec}*/
 	}
 
 	pub fn all(&self) -> bool {
