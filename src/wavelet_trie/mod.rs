@@ -1,6 +1,6 @@
 extern crate dyn_bit_vec;
 
-use self::dyn_bit_vec::dyn_bit_vec::DBVec;
+use self::dyn_bit_vec::DBVec;
 use bit_vec_wrap::BitVecWrap;
 use std::vec::Vec;
 use std::string::FromUtf8Error;
@@ -89,6 +89,31 @@ impl WaveletTrie {
 				self.prefix_d = first_sequence.clone();
 				self.positions_d = DBVec::from_elem(sequences.len(), false);
 			} else {
+				// create children
+				let mut left_child = WaveletTrie::new();
+				let mut right_child = WaveletTrie::new();
+				// find longest common prefix
+				self.prefix_d = first_sequence.clone();
+				for sequence in sequences {
+					self.prefix_d = self.prefix_d.longest_common_prefix(sequence);
+				}
+				// split accordingly
+				let mut left_sequences: Vec<DBVec> = Vec::new();
+				let mut right_sequences: Vec<DBVec> = Vec::new();
+				for sequence in sequences {
+					let bit = sequence.different_suffix(self.prefix_d.len());
+					self.positions_d.push(bit);
+					if bit {
+						right_sequences.push(sequence);
+					} else {
+						left_sequences.push(sequence);
+					}
+				}
+				// now insert left and right sequences into subtrees
+				left_child.insert_static_d(&left_sequences);
+				right_child.insert_static_d(&right_sequences);
+				self.left = Some(Box::new(left_child));
+				self.right = Some(Box::new(right_child));
 				// TODO
 			}
 		}
