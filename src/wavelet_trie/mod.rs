@@ -41,6 +41,12 @@ impl WaveletTrie {
 		wavelet_trie
 	}
 
+	pub fn from_sequences_d(sequences: &[DBVec]) -> Self {
+		let mut wavelet_trie = WaveletTrie::new();
+		wavelet_trie.insert_static_d(sequences);
+		wavelet_trie
+	}
+
 	// TODO pub fn from_sequences(sequences: &[BitVecWrap]) -> Self {}
 
 	fn insert_static(&mut self, sequences: &[BitVecWrap]) {
@@ -101,12 +107,12 @@ impl WaveletTrie {
 				let mut left_sequences: Vec<DBVec> = Vec::new();
 				let mut right_sequences: Vec<DBVec> = Vec::new();
 				for sequence in sequences {
-					let bit = sequence.different_suffix(self.prefix_d.len());
+					let (bit, suffix) = sequence.different_suffix(self.prefix_d.len());
 					self.positions_d.push(bit);
 					if bit {
-						right_sequences.push(sequence);
+						right_sequences.push(suffix);
 					} else {
-						left_sequences.push(sequence);
+						left_sequences.push(suffix);
 					}
 				}
 				// now insert left and right sequences into subtrees
@@ -114,7 +120,6 @@ impl WaveletTrie {
 				right_child.insert_static_d(&right_sequences);
 				self.left = Some(Box::new(left_child));
 				self.right = Some(Box::new(right_child));
-				// TODO
 			}
 		}
 	}
