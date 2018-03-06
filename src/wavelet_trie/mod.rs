@@ -47,8 +47,6 @@ impl WaveletTrie {
 		wavelet_trie
 	}
 
-	// TODO pub fn from_sequences(sequences: &[BitVecWrap]) -> Self {}
-
 	fn insert_static(&mut self, sequences: &[BitVecWrap]) {
 		if !sequences.is_empty() {
 			// first check if all bitvectors in the sequence are the same
@@ -321,9 +319,52 @@ impl WaveletTrie {
 		}
 	}
 
+	pub fn rank_d(&self, sequence: &DBVec, index: u64) -> Option<u64> {
+		if self.prefix_d.is_empty() && self.positions_d.is_empty() {
+			None
+		} else if sequence.is_empty() || sequence == &self.prefix_d {
+			Some(index)
+		} else if sequence.len() < self.prefix_d.len() {
+			// sequence has to be a prefix of "prefix"
+			// if so, return "index". If not, the sequence is not in the trie.
+			match self.prefix_d.starts_with(sequence) {
+				true => Some(index),
+				false => None
+			}
+		} else {
+			// "prefix" has to be a prefix of sequence
+			// if so, substract "prefix" from the beginning of sequence, and recurse!
+			match sequence.starts_with(&self.prefix_d) {
+				true => {
+					let (bit, suffix) = sequence.different_suffix(self.prefix_d.len());
+					let new_index = self.positions_d.rank(bit, index);
+					match bit {
+						true => {
+							match self.right {
+								Some(ref trie) => trie.rank_d(&suffix, new_index),
+								None => Some(new_index)
+							}
+						},
+						false => {
+							match self.left {
+								Some(ref trie) => trie.rank_d(&suffix, new_index),
+								None => Some(new_index)
+							}
+						}
+					}
+				},
+				false => None
+			}
+		}
+	}
+
 	// the number of sequences contained in this trie
 	pub fn len(&self) -> usize {
 		self.positions.len()
+	}
+
+	pub fn len_d(&self) -> u64 {
+		self.positions_d.len()
 	}
 
 	// retrieve the sequence at the given index

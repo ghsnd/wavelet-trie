@@ -24,6 +24,11 @@ mod tests {
 	}
 
 	#[test]
+	fn insert_static() {
+		// TODO
+	}
+
+	#[test]
 	fn insert_one_sequence() {
 		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
 		insert_static_and_check(&[sequence]);
