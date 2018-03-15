@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+	extern crate dyn_bit_vec;
+	use self::dyn_bit_vec::DBVec;
 	use bit_vec_wrap::BitVecWrap;
 	use wavelet_trie::WaveletTrie;
 	use std::collections::HashMap;
@@ -23,9 +25,30 @@ mod tests {
 		}
 	}
 
+	// inserts the sequences statically in a wavelet trie and checks the
+	// ranks of the sequences at the last position when inserted.
+	fn insert_static_and_check_d(sequences: &[DBVec]) {
+		let wt = WaveletTrie::from_sequences(sequences);
+		assert_ranks(&wt, sequences);
+	}
+
+	fn assert_ranks_d(wt: &WaveletTrie, sequences: &[DBVec]) {
+		let len = wt.len();
+		let mut sequence_counter = HashMap::new();
+		for sequence in sequences {
+			let counter = sequence_counter.entry(sequence).or_insert(0);
+			*counter += 1;
+		}
+		for (sequence, count) in sequence_counter {
+			assert_eq!(Some(count), wt.rank(sequence, len));
+		}
+	}
+
 	#[test]
-	fn insert_static() {
-		// TODO
+	fn insert_static() { 
+		let sequence = DBVec::from_bytes(&[0b00001000]);
+		let wt = WaveletTrie::from_sequences_d(&[sequence]);
+		wt.print_stats();
 	}
 
 	#[test]

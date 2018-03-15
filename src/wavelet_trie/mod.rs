@@ -134,6 +134,18 @@ impl WaveletTrie {
 		}
 	}
 
+	pub fn print_stats_d(&self) {
+		println!("prefix len: {}\tpositions len: {}", self.prefix_d.len(), self.positions_d.len());
+		println!("prefix: {:?}", self.prefix_d);
+		println!("positions: {:?}", self.positions_d);
+		if let Some(ref child) = self.left {
+			child.print_stats();
+		}
+		if let Some(ref child) = self.right {
+			child.print_stats();
+		}
+	}
+
 	// append a sequence to the trie at last position
 	pub fn append(&mut self, sequence: &BitVecWrap) -> Result<(), &'static str> {
 		let index = self.positions.len();
