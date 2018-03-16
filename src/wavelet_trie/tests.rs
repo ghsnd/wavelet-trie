@@ -28,27 +28,34 @@ mod tests {
 	// inserts the sequences statically in a wavelet trie and checks the
 	// ranks of the sequences at the last position when inserted.
 	fn insert_static_and_check_d(sequences: &[DBVec]) {
-		let wt = WaveletTrie::from_sequences(sequences);
-		assert_ranks(&wt, sequences);
+		let wt = WaveletTrie::from_sequences_d(sequences);
+		println!("WT: {:?}", wt);
+		assert_ranks_d(&wt, sequences);
 	}
 
 	fn assert_ranks_d(wt: &WaveletTrie, sequences: &[DBVec]) {
-		let len = wt.len();
+		let len = wt.len_d();
 		let mut sequence_counter = HashMap::new();
 		for sequence in sequences {
 			let counter = sequence_counter.entry(sequence).or_insert(0);
 			*counter += 1;
 		}
 		for (sequence, count) in sequence_counter {
-			assert_eq!(Some(count), wt.rank(sequence, len));
+			assert_eq!(Some(count), wt.rank_d(sequence, len));
 		}
 	}
 
 	#[test]
-	fn insert_static() { 
+	fn insert_static_d() {
 		let sequence = DBVec::from_bytes(&[0b00001000]);
-		let wt = WaveletTrie::from_sequences_d(&[sequence]);
-		wt.print_stats();
+		insert_static_and_check_d(&[sequence]);
+	}
+
+	#[test]
+	fn insert_same_sequences_d() {
+		let sequence1 = DBVec::from_bytes(&[0b00001000]);
+		let sequence2 = DBVec::from_bytes(&[0b00001000]);
+		insert_static_and_check_d(&[sequence1, sequence2]);
 	}
 
 	#[test]
