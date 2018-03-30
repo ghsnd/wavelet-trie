@@ -41,6 +41,9 @@ mod tests {
 			*counter += 1;
 		}
 		for (sequence, count) in sequence_counter {
+			println!("sequence: {:?}", sequence);
+			println!("count   : {}", count);
+			println!("rank    : {:?}\n", wt.rank_d(sequence, len));
 			assert_eq!(Some(count), wt.rank_d(sequence, len));
 		}
 	}
@@ -65,6 +68,12 @@ mod tests {
 	}
 
 	#[test]
+	fn insert_one_sequence_d() {
+		let sequence = DBVec::from_bytes(&[0b00001000]);
+		insert_static_and_check_d(&[sequence]);
+	}
+
+	#[test]
 	fn insert_same_sequences() {
 		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence2 = BitVecWrap::from_bytes(&[0b00001000]);
@@ -79,11 +88,34 @@ mod tests {
 	}
 
 	#[test]
+	fn insert_two_different_sequences_d() {
+		let sequence1 = DBVec::from_bytes(&[0b00001000]);
+		let sequence2 = DBVec::from_bytes(&[0b10000000]);
+		insert_static_and_check_d(&[sequence1, sequence2]);
+	}
+
+	#[test]
 	fn insert_different_sequences() {
 		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
 		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
 		insert_static_and_check(&[sequence1, sequence2, sequence3]);
+	}
+
+	#[test]
+	fn compare_bits_internally() {
+		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
+		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
+		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
+		let wt_bvw = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3]);
+		/*let sequenced1 = DBVec::from_bytes(&[0b00001000]);
+		let sequenced2 = DBVec::from_bytes(&[0b00000001]);
+		let sequenced3 = DBVec::from_bytes(&[0b00100001]);*/
+		let sequenced1 = DBVec::from_bytes(&[0b00010000]);
+		let sequenced2 = DBVec::from_bytes(&[0b10000000]);
+		let sequenced3 = DBVec::from_bytes(&[0b10000100]);
+		let wt_dbv = WaveletTrie::from_sequences_d(&[sequenced1, sequenced2, sequenced3]);
+		wt_bvw.compare_bits_internally(&wt_dbv);
 	}
 
 	#[test]
@@ -147,11 +179,79 @@ mod tests {
 	}
 
 	#[test]
+	fn rank_d() {
+		// this tests the binary example from the paper
+		// see also example.txt in de root of this repo
+
+		// 0001
+		let mut s1 = DBVec::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = DBVec::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = DBVec::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = DBVec::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
+		let wt = WaveletTrie::from_sequences_d(sequences);
+		println!("{:?}", wt);
+
+		assert_eq!(Some(0), wt.rank_d(&s3, 0));
+		assert_eq!(Some(0), wt.rank_d(&s3, 2));
+		assert_eq!(Some(1), wt.rank_d(&s3, 3));
+		assert_eq!(Some(1), wt.rank_d(&s3, 4));
+		assert_eq!(Some(2), wt.rank_d(&s3, 5));
+		assert_eq!(Some(2), wt.rank_d(&s3, 6));
+		assert_eq!(Some(3), wt.rank_d(&s3, 7));
+
+		let mut seq_0 = DBVec::new();
+		seq_0.push(false);
+		for number in 0..7 {
+			assert_eq!(Some(number), wt.rank_d(&seq_0, number));
+		}
+
+		let mut seq_none = DBVec::new();
+		seq_none.push(false);
+		seq_none.push(false);
+		seq_none.push(false);
+		seq_none.push(false);
+		assert_eq!(None, wt.rank_d(&seq_none, 7));
+	}
+
+	#[test]
 	fn insert_dynamic_one_sequence() {
 		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
 		let mut wt = WaveletTrie::new();
 		assert_eq!(Ok(()), wt.insert(&sequence, 0));
 		assert_ranks(&wt, &[sequence])
+	}
+
+	#[test]
+	fn insert_dynamic_one_sequence_d() {
+		let sequence = DBVec::from_bytes(&[0b00001000]);
+		let mut wt = WaveletTrie::new();
+		assert_eq!(Ok(()), wt.insert_d(&sequence, 0));
+		assert_ranks_d(&wt, &[sequence])
 	}
 
 	#[test]
@@ -165,6 +265,19 @@ mod tests {
 		assert_eq!(Ok(()), wt.insert(&sequence3, 0));
 		let sequences = &[sequence1, sequence2, sequence3];
 		assert_ranks(&wt, sequences);
+	}
+
+	#[test]
+	fn insert_dynamic_out_of_order_d() {
+		let sequence1 = DBVec::from_bytes(&[0b00001000]);
+		let sequence2 = DBVec::from_bytes(&[0b00001000]);
+		let sequence3 = DBVec::from_bytes(&[0b00011000]);
+		let mut wt = WaveletTrie::new();
+		assert_eq!(Ok(()), wt.insert_d(&sequence1, 0));
+		assert_eq!(Ok(()), wt.insert_d(&sequence2, 1));
+		assert_eq!(Ok(()), wt.insert_d(&sequence3, 0));
+		let sequences = &[sequence1, sequence2, sequence3];
+		assert_ranks_d(&wt, sequences);
 	}
 
 	#[test]
@@ -212,6 +325,53 @@ mod tests {
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
 		assert_ranks(&wt, sequences);
 		wt.print_stats();
+	}
+
+	#[test]
+	fn insert_example_dynamic_in_order_d() {
+		// 0001
+		let mut s1 = DBVec::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = DBVec::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = DBVec::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = DBVec::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let mut wt = WaveletTrie::new();
+		assert_eq!(Ok(()), wt.insert_d(&s1, 0));
+		assert_eq!(Ok(()), wt.insert_d(&s2, 1));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 2));
+		assert_eq!(Ok(()), wt.insert_d(&s4, 3));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 4));
+		assert_eq!(Ok(()), wt.insert_d(&s4, 5));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 6));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 7));
+		
+		println!("{:?}", wt);
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
+		assert_ranks_d(&wt, sequences);
+		wt.print_stats_d();
 	}
 
 	#[test]
