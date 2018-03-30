@@ -65,6 +65,12 @@ mod tests {
 	}
 
 	#[test]
+	fn insert_one_sequence_d() {
+		let sequence = DBVec::from_bytes(&[0b00001000]);
+		insert_static_and_check_d(&[sequence]);
+	}
+
+	#[test]
 	fn insert_same_sequences() {
 		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence2 = BitVecWrap::from_bytes(&[0b00001000]);
@@ -76,6 +82,13 @@ mod tests {
 		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
 		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
 		insert_static_and_check(&[sequence1, sequence2]);
+	}
+
+	#[test]
+	fn insert_two_different_sequences_d() {
+		let sequence1 = DBVec::from_bytes(&[0b00001000]);
+		let sequence2 = DBVec::from_bytes(&[0b10000000]);
+		insert_static_and_check_d(&[sequence1, sequence2]);
 	}
 
 	#[test]
@@ -160,6 +173,66 @@ mod tests {
 		seq_none.push(false);
 		seq_none.push(false);
 		assert_eq!(None, wt.rank(&seq_none, 7));
+	}
+
+	#[test]
+	fn rank_d() {
+		// this tests the binary example from the paper
+		// see also example.txt in de root of this repo
+
+		// 0001
+		let mut s1 = DBVec::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = DBVec::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = DBVec::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = DBVec::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
+		let wt = WaveletTrie::from_sequences_d(sequences);
+		println!("{:?}", wt);
+
+		assert_eq!(Some(0), wt.rank_d(&s3, 0));
+		assert_eq!(Some(0), wt.rank_d(&s3, 2));
+		assert_eq!(Some(1), wt.rank_d(&s3, 3));
+		assert_eq!(Some(1), wt.rank_d(&s3, 4));
+		assert_eq!(Some(2), wt.rank_d(&s3, 5));
+		assert_eq!(Some(2), wt.rank_d(&s3, 6));
+		assert_eq!(Some(3), wt.rank_d(&s3, 7));
+
+		let mut seq_0 = DBVec::new();
+		seq_0.push(false);
+		for number in 0..7 {
+			assert_eq!(Some(number), wt.rank_d(&seq_0, number));
+		}
+
+		let mut seq_none = DBVec::new();
+		seq_none.push(false);
+		seq_none.push(false);
+		seq_none.push(false);
+		seq_none.push(false);
+		assert_eq!(None, wt.rank_d(&seq_none, 7));
 	}
 
 	#[test]
