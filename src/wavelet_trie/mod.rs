@@ -314,7 +314,7 @@ impl WaveletTrie {
 			// case 2: empty prefix, children
 			} else {
 				if sequence.is_empty() {
-					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (1)");
+					return Err("The string being inserted is a prefix of a string in the trie, which is not allowed. (1)");
 				} else {
 					return self.insert_to_child_d(sequence, index);
 				}
@@ -324,19 +324,19 @@ impl WaveletTrie {
 		// case 3: prefix is not empty
 		else {
 			if sequence.is_empty() {
-				return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (5)");
+				return Err("The string being inserted is a prefix of a string in the trie, which is not allowed. (5)");
 			} else if &self.prefix_d == sequence {
 				if self.left.is_none() {
 					self.positions_d.insert(false, index);
 					return Ok(());
 				} else {
-					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (2)");
+					return Err("The string being inserted is a prefix of a string in the trie, which is not allowed. (2)");
 				}
 			} else if self.prefix_d.starts_with(&sequence) {
-				return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (3)");
+				return Err("The string being inserted is a prefix of a string in the trie, which is not allowed. (3)");
 			} else if sequence.starts_with(&self.prefix_d) {
 				if self.left.is_none() {
-					return Err("A string in the trie The string being inserded is a prefix of a , which is not allowed. (4)");
+					return Err("A string in the trie The string being inserted is a prefix of a , which is not allowed. (4)");
 				} else {
 					return self.insert_to_child_d(sequence, index);
 				}
