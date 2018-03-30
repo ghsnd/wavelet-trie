@@ -91,7 +91,7 @@ impl WaveletTrie {
 			let all_equal = sequences.iter().all( |current_sequence| current_sequence == first_sequence);
 			if all_equal {
 				self.prefix_d = first_sequence.clone();
-				self.positions_d = DBVec::from_elem(sequences.len(), false);
+				self.positions_d = DBVec::from_elem(sequences.len() as u64, false);
 			} else {
 				// create children
 				let mut left_child = WaveletTrie::new();
@@ -278,6 +278,118 @@ impl WaveletTrie {
 		}
 	}
 
+	pub fn insert_d(&mut self, sequence: &DBVec, index: u64) -> Result<(), &'static str> {
+		// 1. self.prefix is empty, no children:
+		//     self.prefix = sequence
+		// 2. self.prefix is empty, children:
+		//     2.a. sequence is empty:
+		//         ERROR: sequence a prefix of self.prefix
+		//     2.b. sequence not empty:
+		//         Take the first bit off of sequence; this determines whether the rest of sequence is inserted into the left or right child
+		// 3. self.prefix not empty:
+		//     3.a. sequence is empty:
+		//         ERROR: sequence is prefix of string already in the trie
+		//     3.b. self.prefix == sequence:
+		//         if no children: OK
+		//         if children: ERROR: sequence is prefix of string already in trie
+		//     3.c. sequence is prefix of self.prefix:
+		//         ERROR
+		//     3.d. self.prefix is prefix of sequence:
+		//         if children: substract self.prefix from sequence, take the first bit off of sequence; this determines whether the rest of sequence is inserted into the left or right child
+		//         if no children: ERROR
+		//     else:
+		//         (split current node; one child is existing trie and the other a new leaf)
+		//         calculate longest common prefix (lcp) of self.prefix and sequence
+		//         one new node has as prefix the suffix of self.prefix and the original children
+		//         one new node had as prefix the suffix of sequence and no children
+		//         self.prefix = lcp; self.left and self.right are the new nodes, determined by the first buit of the calculated suffixes
+
+		if self.prefix_d.is_empty() {
+			// case 1: empty prefix, no children
+			if self.left.is_none() {
+				self.prefix_d = sequence.copy();
+				self.positions_d.push(false);
+				return Ok(());
+
+			// case 2: empty prefix, children
+			} else {
+				if sequence.is_empty() {
+					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (1)");
+				} else {
+					return self.insert_to_child_d(sequence, index);
+				}
+			}
+		}
+
+		// case 3: prefix is not empty
+		else {
+			if sequence.is_empty() {
+				return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (5)");
+			} else if &self.prefix_d == sequence {
+				if self.left.is_none() {
+					self.positions_d.insert(false, index);
+					return Ok(());
+				} else {
+					return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (2)");
+				}
+			} else if self.prefix_d.starts_with(&sequence) {
+				return Err("The string being inserded is a prefix of a string in the trie, which is not allowed. (3)");
+			} else if sequence.starts_with(&self.prefix_d) {
+				if self.left.is_none() {
+					return Err("A string in the trie The string being inserded is a prefix of a , which is not allowed. (4)");
+				} else {
+					return self.insert_to_child_d(sequence, index);
+				}
+			} else {
+				let lcp = sequence.longest_common_prefix(&self.prefix_d);
+				// bit_self determines wheter original node comes as left or right child in of new node
+				// suffix_self becomes prefix in new split node
+				let (bit_self, suffix_self) = self.prefix_d.different_suffix(lcp.len());
+				// suffix_seq becomes prefix in new leaf
+				let (bit_seq, suffix_seq) = sequence.different_suffix(lcp.len());
+
+				// reconstruct the original node
+				let original_left = self.left.take();
+				let original_right = self.right.take();
+				let original_positions = self.positions_d.copy();
+				let original_node = WaveletTrie {
+					left: original_left,
+					right: original_right,
+					prefix: BitVecWrap::new(),
+					prefix_d: suffix_self,
+					positions: BitVecWrap::new(),
+					positions_d: original_positions
+				};
+
+				// create the leaf
+				let new_leaf = WaveletTrie {
+					left: None,
+					right: None,
+					prefix: BitVecWrap::new(),
+					prefix_d: suffix_seq,
+					positions : BitVecWrap::new(),
+					positions_d: DBVec::from_elem(1, false)
+				};
+
+				// make this node the new node
+				let (new_left, new_right) = match bit_self {
+					false => (Some(Box::new(original_node)), Some(Box::new(new_leaf))),
+					true => (Some(Box::new(new_leaf)), Some(Box::new(original_node)))
+				};
+				self.left = new_left;
+				self.right = new_right;
+				self.prefix_d = lcp;
+				let pos_len = self.positions_d.len();
+				self.positions_d = DBVec::from_elem(pos_len, bit_self);
+				self.positions_d.insert(bit_seq, index);
+
+				return Ok(());
+			}
+		}
+
+		//Ok(())
+	}
+
 	// inserts the non-common suffix of a sequence with the prefix in a child node,
 	// determined by the first bit of the suffix
 	fn insert_to_child(&mut self, sequence: &BitVecWrap, index: usize) -> Result<(), &'static str> {
@@ -303,6 +415,27 @@ impl WaveletTrie {
 			}
 		};
 		return result;
+	}
+
+	fn insert_to_child_d(&mut self, sequence: &DBVec, index: u64) -> Result<(), &'static str> {
+		let (bit, suffix) = sequence.different_suffix(self.prefix_d.len());
+		let new_pos = self.positions_d.rank(bit, index);
+		match bit {
+			true => {
+				if let Some(ref mut child) = self.right {
+					child.insert_d(&suffix, new_pos)
+				} else {
+					Err("The right child has run away!")
+				}
+			},
+			false => {
+				if let Some(ref mut child) = self.left {
+					child.insert_d(&suffix, new_pos)
+				} else {
+					Err("The left child has run away!")
+				}
+			}
+		}
 	}
 
 	// count the number of occurrences "sequence" (can be a prefix) up to index − 1.
