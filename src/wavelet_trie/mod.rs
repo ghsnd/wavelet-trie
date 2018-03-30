@@ -1,16 +1,16 @@
 extern crate dyn_bit_vec;
 
 use self::dyn_bit_vec::DBVec;
-use bit_vec_wrap::BitVecWrap;
+use std::fmt;
 use std::vec::Vec;
 use std::string::FromUtf8Error;
+use bit_vec_wrap::BitVecWrap;
 
 // based on the paper:
 // R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
 // strings are assumed prefix-free. This can be solved by appending a terminator symbol at the end of the string.
 
 // a node in the wavelet trie
-#[derive(Debug)]
 pub struct WaveletTrie {
 	prefix: BitVecWrap,               // α in the literature
 	prefix_d: DBVec,                  // α in the literature
@@ -762,6 +762,34 @@ impl WaveletTrie {
 		String::from_utf8(bytes)
 	}
 
+	fn fmt_pretty(&self, f: &mut fmt::Formatter, level: usize) -> fmt::Result {
+		let indent = String::from_utf8(vec![32; level * 3]).unwrap();
+		let _a = write!(f, "{}len      : {}\n", indent, self.len_d());
+		let _b = write!(f, "{}prefix   : {:?}\n", indent, self.prefix_d);
+		let _c = write!(f, "{}positions: {:?}\n", indent, self.positions_d);
+		let _d = match self.left {
+			None => write!(f, "{}left     : none\n", indent),
+			Some(ref child) => {
+				let _ = write!(f, "{}left (\n", indent);
+				let _ = child.fmt_pretty(f, level + 1);
+				write!(f, "{})\n", indent)
+			}
+		};
+		match self.right {
+			None => write!(f, "{}right    : none\n", indent),
+			Some(ref child) => {
+				let _ = write!(f, "{}right (\n", indent);
+				let _ = child.fmt_pretty(f, level + 1);
+				write!(f, "{})\n", indent)
+			}
+		}
+	}
+}
+
+impl fmt::Debug for WaveletTrie {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		self.fmt_pretty(f, 0)
+	}
 }
 
 mod tests;

@@ -367,9 +367,14 @@ mod tests {
 		assert_eq!(Ok(()), wt.insert_d(&s4, 5));
 		assert_eq!(Ok(()), wt.insert_d(&s3, 6));
 		assert_eq!(Ok(()), wt.insert_d(&s3, 7));
-		
-		println!("{:?}", wt);
+
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
+		println!("\nsequences: ");
+		for sequence in sequences {
+			println!("{:?}", sequence);
+		}
+		println!("\nwt:");
+		println!("{:?}", wt);
 		assert_ranks_d(&wt, sequences);
 		wt.print_stats_d();
 	}
