@@ -146,6 +146,21 @@ impl WaveletTrie {
 		}
 	}
 
+	// only during transition from bit_vec_wrap to dyn_bit_vec
+	// self: using bit_vec_wrap, other: using dyn_bit_vec
+	pub fn compare_bits_internally(&self, other: &Self) {
+		Self::compare_bitvecs(&self.prefix, &other.prefix_d);
+	}
+
+	fn compare_bitvecs(bvw: &BitVecWrap, dbv: &DBVec) {
+		let len = bvw.len();	// usize
+		assert_eq!(len as u64, dbv.len());
+
+		for index in 0..len {
+			assert_eq!(bvw.get(index).unwrap(), dbv.get(index as u64));
+		}
+	}
+
 	// append a sequence to the trie at last position
 	pub fn append(&mut self, sequence: &BitVecWrap) -> Result<(), &'static str> {
 		let index = self.positions.len();

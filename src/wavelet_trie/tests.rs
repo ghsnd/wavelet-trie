@@ -87,6 +87,22 @@ mod tests {
 	}
 
 	#[test]
+	fn compare_bits_internally() {
+		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
+		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
+		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
+		let wt_bvw = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3]);
+		/*let sequenced1 = DBVec::from_bytes(&[0b00001000]);
+		let sequenced2 = DBVec::from_bytes(&[0b00000001]);
+		let sequenced3 = DBVec::from_bytes(&[0b00100001]);*/
+		let sequenced1 = DBVec::from_bytes(&[0b00010000]);
+		let sequenced2 = DBVec::from_bytes(&[0b10000000]);
+		let sequenced3 = DBVec::from_bytes(&[0b10000100]);
+		let wt_dbv = WaveletTrie::from_sequences_d(&[sequenced1, sequenced2, sequenced3]);
+		wt_bvw.compare_bits_internally(&wt_dbv);
+	}
+
+	#[test]
 	fn rank() {
 		// this tests the binary example from the paper
 		// see also example.txt in de root of this repo
