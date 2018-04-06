@@ -108,9 +108,7 @@ mod tests {
 		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
 		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
 		let wt_bvw = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3]);
-		/*let sequenced1 = DBVec::from_bytes(&[0b00001000]);
-		let sequenced2 = DBVec::from_bytes(&[0b00000001]);
-		let sequenced3 = DBVec::from_bytes(&[0b00100001]);*/
+		// dyn-bit-vec stores its bits "backwards" in comparison to bit-vec-wrap
 		let sequenced1 = DBVec::from_bytes(&[0b00010000]);
 		let sequenced2 = DBVec::from_bytes(&[0b10000000]);
 		let sequenced3 = DBVec::from_bytes(&[0b10000100]);
@@ -363,12 +361,12 @@ mod tests {
 		assert_eq!(Ok(()), wt.insert_d(&s2, 1));
 		assert_eq!(Ok(()), wt.insert_d(&s3, 2));
 		assert_eq!(Ok(()), wt.insert_d(&s4, 3));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 4));
+		/*assert_eq!(Ok(()), wt.insert_d(&s3, 4));
 		assert_eq!(Ok(()), wt.insert_d(&s4, 5));
 		assert_eq!(Ok(()), wt.insert_d(&s3, 6));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 7));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 7));*/
 
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy()/*, s3.copy(), s4.copy(), s3.copy(), s3.copy()*/];
 		println!("\nsequences: ");
 		for sequence in sequences {
 			println!("{:?}", sequence);
