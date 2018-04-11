@@ -29,7 +29,6 @@ mod tests {
 	// ranks of the sequences at the last position when inserted.
 	fn insert_static_and_check_d(sequences: &[DBVec]) {
 		let wt = WaveletTrie::from_sequences_d(sequences);
-		println!("WT: {:?}", wt);
 		assert_ranks_d(&wt, sequences);
 	}
 
@@ -41,9 +40,6 @@ mod tests {
 			*counter += 1;
 		}
 		for (sequence, count) in sequence_counter {
-			println!("sequence: {:?}", sequence);
-			println!("count   : {}", count);
-			println!("rank    : {:?}\n", wt.rank_d(sequence, len));
 			assert_eq!(Some(count), wt.rank_d(sequence, len));
 		}
 	}
@@ -361,17 +357,12 @@ mod tests {
 		assert_eq!(Ok(()), wt.insert_d(&s2, 1));
 		assert_eq!(Ok(()), wt.insert_d(&s3, 2));
 		assert_eq!(Ok(()), wt.insert_d(&s4, 3));
-		/*assert_eq!(Ok(()), wt.insert_d(&s3, 4));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 4));
 		assert_eq!(Ok(()), wt.insert_d(&s4, 5));
 		assert_eq!(Ok(()), wt.insert_d(&s3, 6));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 7));*/
+		assert_eq!(Ok(()), wt.insert_d(&s3, 7));
 
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy()/*, s3.copy(), s4.copy(), s3.copy(), s3.copy()*/];
-		println!("\nsequences: ");
-		for sequence in sequences {
-			println!("{:?}", sequence);
-		}
-		println!("\nwt:");
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
 		println!("{:?}", wt);
 		assert_ranks_d(&wt, sequences);
 		wt.print_stats_d();
