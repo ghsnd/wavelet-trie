@@ -568,6 +568,23 @@ mod tests {
 	}
 
 	#[test]
+	fn access_d() {
+		let sequence1 = DBVec::from_bytes(&[0b00010000]);
+		let sequence2 = DBVec::from_bytes(&[0b10000000]);
+		let sequence3 = DBVec::from_bytes(&[0b10000100]);
+		let sequences = &[sequence1.copy(), sequence2.copy(), sequence3.copy()];
+		let wt = WaveletTrie::from_sequences_d(sequences);
+		println!("{:?}", wt);
+		assert_ranks_d(&wt, sequences);
+		let pos_0_seq = wt.access_d(0);
+		assert_eq!(sequence1, pos_0_seq);
+		let pos_1_seq = wt.access_d(1);
+		assert_eq!(sequence2, pos_1_seq);
+		let pos_2_seq = wt.access_d(2);
+		assert_eq!(sequence3, pos_2_seq);
+	}
+
+	#[test]
 	fn select() {
 		// 0001
 		let mut s1 = BitVecWrap::new();

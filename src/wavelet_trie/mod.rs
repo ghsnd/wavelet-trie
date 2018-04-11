@@ -559,6 +559,29 @@ impl WaveletTrie {
 		result
 	}
 
+	// retrieve the sequence at the given index
+	pub fn access_d(&self, index: u64) -> DBVec {
+		let mut result = self.prefix_d.copy();
+		if self.left.is_some() {	// if NO children, the position vector doesn't count...
+			let bit = self.positions_d.get(index);
+			let new_index = self.positions_d.rank(bit, index);
+			result.push(bit);
+			match bit {
+				true => {
+					if let Some(ref trie) = self.right {
+						result.append_vec(&mut trie.access_d(new_index));
+					}
+				},
+				false => {
+					if let Some(ref trie) = self.left {
+						result.append_vec(&mut trie.access_d(new_index));
+					}
+				}
+			};
+		}
+		result
+	}
+
 	// find the position of the occurrence_nr-th given sequence (can be a prefix)
 	// an occurrence number starts at 1 (a zero-th occurrence makes no sense)
 	// returns None if not found.
