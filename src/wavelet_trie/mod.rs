@@ -278,6 +278,12 @@ impl WaveletTrie {
 		}
 	}
 
+	// append a sequence to the trie at last position
+	pub fn append_d(&mut self, sequence: &DBVec) -> Result<(), &'static str> {
+		let index = self.positions_d.len();
+		self.insert_d(sequence, index)
+	}
+
 	pub fn insert_d(&mut self, sequence: &DBVec, index: u64) -> Result<(), &'static str> {
 		// 1. self.prefix is empty, no children:
 		//     self.prefix = sequence

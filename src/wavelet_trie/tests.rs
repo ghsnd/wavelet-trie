@@ -369,6 +369,51 @@ mod tests {
 	}
 
 	#[test]
+	fn insert_example_dynamic_out_of_order_d() {
+		// 0001
+		let mut s1 = DBVec::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = DBVec::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = DBVec::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = DBVec::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let mut wt = WaveletTrie::new();
+		assert_eq!(Ok(()), wt.insert_d(&s1, 0));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 1));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 2));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 3));
+		assert_eq!(Ok(()), wt.insert_d(&s4, 3));
+		assert_eq!(Ok(()), wt.insert_d(&s4, 2));
+		assert_eq!(Ok(()), wt.insert_d(&s2, 1));
+		assert_eq!(Ok(()), wt.insert_d(&s3, 6));
+		println!("{:?}", wt);
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
+		assert_ranks_d(&wt, sequences);
+	}
+
+	#[test]
 	fn insert_example_dynamic_out_of_order() {
 		// 0001
 		let mut s1 = BitVecWrap::new();
@@ -411,6 +456,52 @@ mod tests {
 		println!("{:?}", wt);
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
 		assert_ranks(&wt, sequences);
+	}
+
+	#[test]
+	fn append_d() {
+		// 0001
+		let mut s1 = DBVec::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = DBVec::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = DBVec::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = DBVec::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let mut wt = WaveletTrie::new();
+		assert_eq!(Ok(()), wt.append_d(&s1));
+		assert_eq!(Ok(()), wt.append_d(&s2));
+		assert_eq!(Ok(()), wt.append_d(&s3));
+		assert_eq!(Ok(()), wt.append_d(&s4));
+		assert_eq!(Ok(()), wt.append_d(&s3));
+		assert_eq!(Ok(()), wt.append_d(&s4));
+		assert_eq!(Ok(()), wt.append_d(&s3));
+		assert_eq!(Ok(()), wt.append_d(&s3));
+
+		println!("{:?}", wt);
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
+		assert_ranks_d(&wt, sequences);
 	}
 
 	#[test]
