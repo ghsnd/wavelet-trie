@@ -419,6 +419,7 @@ impl WaveletTrie {
 
 	fn insert_to_child_d(&mut self, sequence: &DBVec, index: u64) -> Result<(), &'static str> {
 		let (bit, suffix) = sequence.different_suffix(self.prefix_d.len());
+		self.positions_d.insert(bit, index);
 		let new_pos = self.positions_d.rank(bit, index);
 		match bit {
 			true => {
