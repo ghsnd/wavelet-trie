@@ -639,7 +639,62 @@ mod tests {
 		assert_eq!(None, wt.select(&s3, 4));
 	}
 
-		#[test]
+	#[test]
+	fn select_d() {
+		// 0001
+		let mut s1 = DBVec::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = DBVec::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = DBVec::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = DBVec::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
+		let wt = WaveletTrie::from_sequences_d(sequences);
+
+		assert_eq!(Some(0), wt.select_d(&s1, 1));	// means: the first occurrence of s1 is at index 0!
+		assert_eq!(None, wt.select_d(&s1, 2));	// there is no more s1 further in the trie
+		assert_eq!(Some(1), wt.select_d(&s2, 1));	// s2 first occurs at index 1
+		assert_eq!(Some(2), wt.select_d(&s3, 1));
+		assert_eq!(Some(4), wt.select_d(&s3, 2));
+		assert_eq!(Some(6), wt.select_d(&s3, 3));
+		assert_eq!(None, wt.select_d(&s3, 4));
+		assert_eq!(Some(3), wt.select_d(&s4, 1));
+		assert_eq!(Some(5), wt.select_d(&s4, 2));
+		assert_eq!(Some(2), wt.select_d(&s3, 1));
+		assert_eq!(Some(4), wt.select_d(&s3, 2));
+		assert_eq!(Some(6), wt.select_d(&s3, 3));
+		assert_eq!(None, wt.select_d(&s3, 4));
+		assert_eq!(Some(3), wt.select_d(&s4, 1));
+		assert_eq!(Some(5), wt.select_d(&s4, 2));
+		assert_eq!(Some(2), wt.select_d(&s3, 1));
+		assert_eq!(Some(4), wt.select_d(&s3, 2));
+		assert_eq!(Some(6), wt.select_d(&s3, 3));
+		assert_eq!(None, wt.select_d(&s3, 4));
+	}
+
+	#[test]
 	fn select_all() {
 		// 0001
 		let mut s1 = BitVecWrap::new();

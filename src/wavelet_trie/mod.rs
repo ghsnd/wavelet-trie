@@ -628,6 +628,52 @@ impl WaveletTrie {
 		}
 	}
 
+	// find the position of the occurrence_nr-th given sequence (can be a prefix)
+	// an occurrence number starts at 1 (a zero-th occurrence makes no sense)
+	// returns None if not found.
+	pub fn select_d(&self, sequence: &DBVec, occurrence_nr: u64) -> Option<u64> {
+		// find recursively until node where sequence matches or is prefix of self.prefix.
+		// upon return, calculate back the positions of [bit], depending on the value of bit.
+		if sequence.is_empty() || sequence == &self.prefix_d || self.prefix_d.starts_with(sequence) {
+			// OK, found!
+			Some(occurrence_nr - 1)	// -1 due to +1 offset of occurrence_nr
+		} else if sequence.starts_with(&self.prefix_d) {
+			if self.left.is_none() {
+				// domage, sequence not in trie!
+				None
+			} else {
+				// search further
+				let (bit, suffix) = sequence.different_suffix(self.prefix_d.len());
+
+				// closure that is used to calculate the new position.
+				let calc_new_pos = |trie: &WaveletTrie| {
+					let pos_option = trie.select_d(&suffix, occurrence_nr);
+					match pos_option {
+						Some(pos) => self.positions_d.select(bit, pos + 1),
+						None => None
+					}
+				};
+				match bit {
+					true => {
+						if let Some(ref trie) = self.right { // is always true in this case
+							return calc_new_pos(trie);
+						}
+					},
+					false => {
+						if let Some(ref trie) = self.left { // is always true in this case
+							return calc_new_pos(trie);
+						}
+					}
+				}
+				// should never come here. Maybe panic?
+				None
+			}
+		} else {
+			// domage, sequence not in trie!
+			None
+		}
+	}
+
 	// find the positions of all occurrences of the given sequence (can be prefix)
 	pub fn select_all(&self, sequence: &BitVecWrap) -> Vec<usize> {
 		if sequence.is_empty() || sequence == &self.prefix || sequence.is_prefix_of(&self.prefix) {
