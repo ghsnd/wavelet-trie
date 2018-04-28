@@ -725,6 +725,57 @@ impl WaveletTrie {
 		}
 	}
 
+	// find the positions of all occurrences of the given sequence (can be prefix)
+	pub fn select_all_d(&self, sequence: &DBVec) -> Vec<u64> {
+		if sequence.is_empty() || sequence == &self.prefix_d || self.prefix_d.starts_with(sequence) {
+			// found! return vector [0, 1, ... positions.len() - 1]
+			let mut result = Vec::with_capacity(self.positions_d.len() as usize);
+			for i in 0..self.positions_d.len() {
+				result.push(i);
+			}
+			result
+		} else if sequence.starts_with(&self.prefix_d) {
+			if self.left.is_none() {
+				// domage, sequence not in trie!
+				Vec::new()
+			} else {
+				// search further
+				let (bit, suffix) = sequence.different_suffix(self.prefix_d.len());
+
+				// closure that is used to calculate the new position.
+				let calc_new_pos = |trie: &WaveletTrie| {
+					let mut all_positions = trie.select_all_d(&suffix);	// positions is now a Vec
+					for position in all_positions.iter_mut() {
+						let new_position = self.positions_d.select(bit, *position + 1);
+						match new_position {
+							Some(new_pos) => {*position = new_pos;},
+							None => {panic!("This cannot happen!");},
+						};
+					}
+					all_positions
+				};
+
+				match bit {
+					true => {
+						if let Some(ref trie) = self.right { // is always true in this case
+							return calc_new_pos(trie);
+						}
+					},
+					false => {
+						if let Some(ref trie) = self.left { // is always true in this case
+							return calc_new_pos(trie);
+						}
+					}
+				}
+				// should never come here. Maybe panic?
+				Vec::new()
+			}
+		} else {
+			// domage, sequence not in trie!
+			Vec::new()
+		}
+	}
+
 	pub fn delete(&mut self, index: usize) {
 		let bit_option = self.positions.get(index);
 		if let Some(bit) = bit_option {

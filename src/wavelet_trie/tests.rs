@@ -745,6 +745,56 @@ mod tests {
 	}
 
 	#[test]
+	fn select_all_d() {
+		// 0001
+		let mut s1 = DBVec::new();
+		s1.push(false);
+		s1.push(false);
+		s1.push(false);
+		s1.push(true);
+
+		// 0011
+		let mut s2 = DBVec::new();
+		s2.push(false);
+		s2.push(false);
+		s2.push(true);
+		s2.push(true);
+
+		// 0100
+		let mut s3 = DBVec::new();
+		s3.push(false);
+		s3.push(true);
+		s3.push(false);
+		s3.push(false);
+
+		// 00100
+		let mut s4 = DBVec::new();
+		s4.push(false);
+		s4.push(false);
+		s4.push(true);
+		s4.push(false);
+		s4.push(false);
+
+		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
+		let wt = WaveletTrie::from_sequences_d(sequences);
+
+		assert_eq!(vec![0], wt.select_all_d(&s1));
+		assert_eq!(vec![1], wt.select_all_d(&s2));
+		assert_eq!(vec![2, 4, 6], wt.select_all_d(&s3));
+		assert_eq!(vec![3, 5], wt.select_all_d(&s4));
+		let empty_vec: Vec<u64> = Vec::new();
+		assert_eq!(empty_vec, wt.select_all_d(&DBVec::from_elem(16, true))); //not in trie
+
+		let mut existing_prefix = DBVec::new();
+		existing_prefix.push(false);
+		existing_prefix.push(false);
+		assert_eq!(vec![0, 1, 3, 5], wt.select_all_d(&existing_prefix));
+
+		let prefix_zero = DBVec::from_elem(0, false);
+		assert_eq!(vec![0, 1, 2, 3, 4, 5, 6], wt.select_all_d(&prefix_zero));
+	}
+
+	#[test]
 	fn str_ops() {
 		let mut wt = WaveletTrie::new();
 		assert_eq!(Ok(()), wt.append_str("Dit is een test"));
