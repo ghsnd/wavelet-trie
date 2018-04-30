@@ -841,6 +841,69 @@ impl WaveletTrie {
 		}
 	}
 
+	pub fn delete_d(&mut self, index: u64) {
+		//let bit_option = self.positions_d.get(index);
+		//if let Some(bit) = bit_option {
+		let bit = self.positions_d.get(index);
+		let new_pos = self.positions_d.rank(bit, index);
+		match bit {
+			true => {
+				let mut delete_child = false;
+				if let Some(ref mut child) = self.right {
+					child.delete_d(new_pos);
+					if child.len() == 0 {	// this would be the leaf node
+						delete_child = true;
+					}
+				}
+				if delete_child {
+					self.right = None;
+					self.prefix_d.push(!bit);
+					// merge other child with this node
+					let mut new_left: Option<Box<WaveletTrie>> = None;
+					let mut new_right: Option<Box<WaveletTrie>> = None;
+					if let Some(ref mut child) = self.left {
+						self.prefix_d.append_vec(&mut child.prefix_d);
+						new_left = child.left.take();
+						new_right = child.right.take();
+					}
+					self.left = new_left;
+					self.right = new_right;
+				}
+			},
+			false => {
+				let mut delete_child = false;
+				if let Some(ref mut child) = self.left {
+					child.delete_d(new_pos);
+					if child.len() == 0 {	// this would be the leaf node
+						delete_child = true;
+					}
+				}
+				if delete_child {
+					self.left = None;
+					self.prefix_d.push(!bit);
+					// merge other child with this node
+					let mut new_left: Option<Box<WaveletTrie>> = None;
+					let mut new_right: Option<Box<WaveletTrie>> = None;
+					if let Some(ref mut child) = self.right {
+						self.prefix_d.append_vec(&mut child.prefix_d);	// TODO check if copy is necessary
+						new_left = child.left.take();
+						new_right = child.right.take();
+					}
+					self.left = new_left;
+					self.right = new_right;
+				}
+			}
+		}
+		self.positions_d.delete(index);
+		if self.len() == 0 {
+			// the trie is in fact empty!
+			self.prefix_d = DBVec::new();
+		}
+		if self.left.is_none() { // if no children, set the positions all to zero
+			self.positions_d.set_none();
+		}
+	}
+
 	// appends a string to the trie
 	pub fn append_str(&mut self, text: &str) -> Result<(), &'static str> {
 		self.append(&Self::text_to_bitvec(text))
