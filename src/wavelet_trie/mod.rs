@@ -909,6 +909,11 @@ impl WaveletTrie {
 		self.append(&Self::text_to_bitvec(text))
 	}
 
+	// appends a string to the trie
+	pub fn append_str_d(&mut self, text: &str) -> Result<(), &'static str> {
+		self.append_d(&Self::text_to_bitvec_d(text))
+	}
+
 	// count the number of occurrences "text" (can be a prefix) up to index − 1.
 	// returns None if the string does not occur
 	pub fn rank_str(&self, text: &str, index: usize) -> Option<usize> {
@@ -939,6 +944,15 @@ impl WaveletTrie {
 		text_bitvec
 	}
 
+	fn text_to_bitvec_d(text: &str) -> DBVec {
+		let text_bytes = text.as_bytes();
+                let mut text_bitvec = DBVec::from_bytes(text_bytes);
+		// add the terminator!
+                let mut end_symbol = DBVec::from_bytes(&[0b0]);
+                text_bitvec.append_vec(&mut end_symbol);
+		text_bitvec
+	}
+
 	// find the positions of all occurrences of the given sequence (can be prefix)
 	pub fn select_all_str(&self, text: &str) -> Vec<usize> {
 		let sequence = BitVecWrap::from_bytes(text.as_bytes());
@@ -946,6 +960,13 @@ impl WaveletTrie {
 	}
 
 	fn bitvec_to_text(sequence: &BitVecWrap) -> Result<String, FromUtf8Error> {
+		let mut bytes = sequence.to_bytes();
+		// destroy the terminator!
+		bytes.pop();
+		String::from_utf8(bytes)
+	}
+
+	fn bitvec_to_text_d(sequence: &DBVec) -> Result<String, FromUtf8Error> {
 		let mut bytes = sequence.to_bytes();
 		// destroy the terminator!
 		bytes.pop();
