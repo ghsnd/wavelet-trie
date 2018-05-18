@@ -851,7 +851,7 @@ impl WaveletTrie {
 				let mut delete_child = false;
 				if let Some(ref mut child) = self.right {
 					child.delete_d(new_pos);
-					if child.len() == 0 {	// this would be the leaf node
+					if child.len_d() == 0 {	// this would be the leaf node
 						delete_child = true;
 					}
 				}
@@ -874,7 +874,7 @@ impl WaveletTrie {
 				let mut delete_child = false;
 				if let Some(ref mut child) = self.left {
 					child.delete_d(new_pos);
-					if child.len() == 0 {	// this would be the leaf node
+					if child.len_d() == 0 {	// this would be the leaf node
 						delete_child = true;
 					}
 				}
@@ -885,7 +885,7 @@ impl WaveletTrie {
 					let mut new_left: Option<Box<WaveletTrie>> = None;
 					let mut new_right: Option<Box<WaveletTrie>> = None;
 					if let Some(ref mut child) = self.right {
-						self.prefix_d.append_vec(&mut child.prefix_d);	// TODO check if copy is necessary
+						self.prefix_d.append_vec(&mut child.prefix_d);
 						new_left = child.left.take();
 						new_right = child.right.take();
 					}
@@ -973,11 +973,34 @@ impl WaveletTrie {
 		String::from_utf8(bytes)
 	}
 
-	fn fmt_pretty(&self, f: &mut fmt::Formatter, level: usize) -> fmt::Result {
+	fn fmt_pretty_d(&self, f: &mut fmt::Formatter, level: usize) -> fmt::Result {
 		let indent = String::from_utf8(vec![32; level * 3]).unwrap();
 		let _a = write!(f, "{}len      : {}\n", indent, self.len_d());
 		let _b = write!(f, "{}prefix   : {:?}\n", indent, self.prefix_d);
 		let _c = write!(f, "{}positions: {:?}\n", indent, self.positions_d);
+		let _d = match self.left {
+			None => write!(f, "{}left     : none\n", indent),
+			Some(ref child) => {
+				let _ = write!(f, "{}left (\n", indent);
+				let _ = child.fmt_pretty_d(f, level + 1);
+				write!(f, "{})\n", indent)
+			}
+		};
+		match self.right {
+			None => write!(f, "{}right    : none\n", indent),
+			Some(ref child) => {
+				let _ = write!(f, "{}right (\n", indent);
+				let _ = child.fmt_pretty_d(f, level + 1);
+				write!(f, "{})\n", indent)
+			}
+		}
+	}
+
+	fn fmt_pretty(&self, f: &mut fmt::Formatter, level: usize) -> fmt::Result {
+		let indent = String::from_utf8(vec![32; level * 3]).unwrap();
+		let _a = write!(f, "{}len      : {}\n", indent, self.len());
+		let _b = write!(f, "{}prefix   : {:?}\n", indent, self.prefix);
+		let _c = write!(f, "{}positions: {:?}\n", indent, self.positions);
 		let _d = match self.left {
 			None => write!(f, "{}left     : none\n", indent),
 			Some(ref child) => {
@@ -999,7 +1022,7 @@ impl WaveletTrie {
 
 impl fmt::Debug for WaveletTrie {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		self.fmt_pretty(f, 0)
+		self.fmt_pretty_d(f, 0)
 	}
 }
 

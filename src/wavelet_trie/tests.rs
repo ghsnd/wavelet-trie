@@ -813,15 +813,16 @@ mod tests {
 	}
 
 	#[test]
-	fn delete() {
+	fn delete_a() {
 		let s1 = BitVecWrap::from_bytes(&[0b00010011]);
 		let s2 = BitVecWrap::from_bytes(&[0b00010110]);
 		let s3 = BitVecWrap::from_bytes(&[0b00010111]);
 		let mut wt = WaveletTrie::from_sequences(&[s1.copy(), s2.copy(), s3.copy()]);
 		println!("{:?}", wt);
 		wt.delete(1);
+		println!("{:?}", wt);
 		assert_eq!(Some(1), wt.rank(&s1, 1));
-		assert_eq!(Some(1), wt.rank(&s3, 2));
+/*		assert_eq!(Some(1), wt.rank(&s3, 2));
 		assert_eq!(None, wt.rank(&s2, 2));
 		println!("{:?}", wt);
 		wt.delete(1);
@@ -830,7 +831,29 @@ mod tests {
 		assert_eq!(None, wt.rank(&s3, 1));
 		wt.delete(0);
 		println!("{:?}", wt);
-		assert_eq!(None, wt.rank(&s1, 0));
+		assert_eq!(None, wt.rank(&s1, 0));*/
+	}
+
+		#[test]
+	fn delete_d() {
+		let s1 = DBVec::from_bytes(&[0b00010011]);
+		let s2 = DBVec::from_bytes(&[0b00010110]);
+		let s3 = DBVec::from_bytes(&[0b00010111]);
+		let mut wt = WaveletTrie::from_sequences_d(&[s1.copy(), s2.copy(), s3.copy()]);
+		println!("{:?}", wt);
+		wt.delete_d(1);
+		println!("{:?}", wt);
+		assert_eq!(Some(1), wt.rank_d(&s1, 1));
+		assert_eq!(Some(1), wt.rank_d(&s3, 2));
+		assert_eq!(None, wt.rank_d(&s2, 2));
+		println!("{:?}", wt);
+		wt.delete_d(1);
+		println!("{:?}", wt);
+		assert_eq!(Some(1), wt.rank_d(&s1, 1));
+		assert_eq!(None, wt.rank_d(&s3, 1));
+		wt.delete_d(0);
+		println!("{:?}", wt);
+		assert_eq!(None, wt.rank_d(&s1, 0));
 	}
 
 }
