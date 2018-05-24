@@ -177,14 +177,14 @@ mod tests {
 		// this tests the binary example from the paper
 		// see also example.txt in de root of this repo
 
-		// 0001
+		// 1000
 		let mut s1 = DBVec::new();
 		s1.push(false);
 		s1.push(false);
 		s1.push(false);
 		s1.push(true);
 
-		// 0011
+		// 1100
 		let mut s2 = DBVec::new();
 		s2.push(false);
 		s2.push(false);
