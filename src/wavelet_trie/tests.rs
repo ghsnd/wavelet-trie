@@ -813,6 +813,24 @@ mod tests {
 	}
 
 	#[test]
+	fn str_ops_d() {
+		let mut wt = WaveletTrie::new();
+		assert_eq!(Ok(()), wt.append_str_d("Dit is een test"));
+		assert_eq!(Ok(()), wt.append_str_d("Dit is een teletubbie"));
+		//println!("{:?}", wt);
+		assert_eq!(Some(2), wt.rank_str_d("Dit is", 2));
+		assert_eq!(None, wt.rank_str_d("st", 2));
+		assert_eq!(Some(1), wt.rank_str_d("Dit is een tele", 2));
+		assert_eq!(String::from("Dit is een test"), wt.access_str_d(0).unwrap());
+		assert_eq!(String::from("Dit is een teletubbie"), wt.access_str_d(1).unwrap());
+		assert_eq!(Some(0), wt.select_str_d("Dit is een test", 1));
+		assert_eq!(Some(1), wt.select_str_d("Dit is een teletubbie", 1));
+		assert_eq!(Some(1), wt.select_str_d("Dit is een te", 2));
+		assert_eq!(vec![0, 1], wt.select_all_str_d("Dit is een"));
+		wt.print_stats_d();
+	}
+
+	#[test]
 	fn delete() {
 		let s1 = BitVecWrap::from_bytes(&[0b00010011]);
 		let s2 = BitVecWrap::from_bytes(&[0b00010110]);

@@ -342,7 +342,7 @@ impl WaveletTrie {
 				return Err("The string being inserted is a prefix of a string in the trie, which is not allowed. (3)");
 			} else if sequence.starts_with(&self.prefix_d) {
 				if self.left.is_none() {
-					return Err("A string in the trie The string being inserted is a prefix of a , which is not allowed. (4)");
+					return Err("The string being inserted is a prefix of a string in the trie , which is not allowed. (4)");
 				} else {
 					return self.insert_to_child_d(sequence, index);
 				}
@@ -842,8 +842,6 @@ impl WaveletTrie {
 	}
 
 	pub fn delete_d(&mut self, index: u64) {
-		//let bit_option = self.positions_d.get(index);
-		//if let Some(bit) = bit_option {
 		let bit = self.positions_d.get(index);
 		let new_pos = self.positions_d.rank(bit, index);
 		match bit {
@@ -914,11 +912,18 @@ impl WaveletTrie {
 		self.append_d(&Self::text_to_bitvec_d(text))
 	}
 
-	// count the number of occurrences "text" (can be a prefix) up to index − 1.
+	// count the number of occurrences "text" (can be a prefix) up to index - 1.
 	// returns None if the string does not occur
 	pub fn rank_str(&self, text: &str, index: usize) -> Option<usize> {
 		let sequence = BitVecWrap::from_bytes(text.as_bytes());
 		self.rank(&sequence, index)
+	}
+
+	// count the number of occurrences "text" (can be a prefix) up to index - 1.
+	// returns None if the string does not occur
+	pub fn rank_str_d(&self, text: &str, index: u64) -> Option<u64> {
+		let sequence = DBVec::from_bytes(text.as_bytes());
+		self.rank_d(&sequence, index)
 	}
 
 	// retrieve the string at the given index
@@ -927,12 +932,26 @@ impl WaveletTrie {
 		Self::bitvec_to_text(&sequence)
 	}
 
+	// retrieve the string at the given index
+	pub fn access_str_d(&self, index: u64) -> Result<String, FromUtf8Error> {
+		let sequence = self.access_d(index);
+		Self::bitvec_to_text_d(&sequence)
+	}
+
 	// find the position of the occurrence_nr-th given string (can be a prefix)
 	// an occurrence number starts at 1 (a zero-th occurrence makes no sense)
 	// returns None if not found.
 	pub fn select_str(&self, text: &str, occurrence_nr: usize) -> Option<usize> {
 		let sequence = BitVecWrap::from_bytes(text.as_bytes());
 		self.select(&sequence, occurrence_nr)
+	}
+
+	// find the position of the occurrence_nr-th given string (can be a prefix)
+	// an occurrence number starts at 1 (a zero-th occurrence makes no sense)
+	// returns None if not found.
+	pub fn select_str_d(&self, text: &str, occurrence_nr: u64) -> Option<u64> {
+		let sequence = DBVec::from_bytes(text.as_bytes());
+		self.select_d(&sequence, occurrence_nr)
 	}
 
 	fn text_to_bitvec(text: &str) -> BitVecWrap {
@@ -946,10 +965,10 @@ impl WaveletTrie {
 
 	fn text_to_bitvec_d(text: &str) -> DBVec {
 		let text_bytes = text.as_bytes();
-                let mut text_bitvec = DBVec::from_bytes(text_bytes);
+		let mut text_bitvec = DBVec::from_bytes(text_bytes);
 		// add the terminator!
-                let mut end_symbol = DBVec::from_bytes(&[0b0]);
-                text_bitvec.append_vec(&mut end_symbol);
+		let mut end_symbol = DBVec::from_bytes(&[0b0]);
+		text_bitvec.append_vec(&mut end_symbol);
 		text_bitvec
 	}
 
@@ -957,6 +976,12 @@ impl WaveletTrie {
 	pub fn select_all_str(&self, text: &str) -> Vec<usize> {
 		let sequence = BitVecWrap::from_bytes(text.as_bytes());
 		self.select_all(&sequence)
+	}
+
+	// find the positions of all occurrences of the given sequence (can be prefix)
+	pub fn select_all_str_d(&self, text: &str) -> Vec<u64> {
+		let sequence = DBVec::from_bytes(text.as_bytes());
+		self.select_all_d(&sequence)
 	}
 
 	fn bitvec_to_text(sequence: &BitVecWrap) -> Result<String, FromUtf8Error> {
