@@ -849,7 +849,7 @@ impl WaveletTrie {
 				let mut delete_child = false;
 				if let Some(ref mut child) = self.right {
 					child.delete_d(new_pos);
-					if child.len() == 0 {	// this would be the leaf node
+					if child.len_d() == 0 {	// this would be the leaf node
 						delete_child = true;
 					}
 				}
@@ -872,7 +872,7 @@ impl WaveletTrie {
 				let mut delete_child = false;
 				if let Some(ref mut child) = self.left {
 					child.delete_d(new_pos);
-					if child.len() == 0 {	// this would be the leaf node
+					if child.len_d() == 0 {	// this would be the leaf node
 						delete_child = true;
 					}
 				}
@@ -883,7 +883,7 @@ impl WaveletTrie {
 					let mut new_left: Option<Box<WaveletTrie>> = None;
 					let mut new_right: Option<Box<WaveletTrie>> = None;
 					if let Some(ref mut child) = self.right {
-						self.prefix_d.append_vec(&mut child.prefix_d);	// TODO check if copy is necessary
+						self.prefix_d.append_vec(&mut child.prefix_d);
 						new_left = child.left.take();
 						new_right = child.right.take();
 					}
