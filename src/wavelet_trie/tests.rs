@@ -2,28 +2,8 @@
 mod tests {
 	extern crate dyn_bit_vec;
 	use self::dyn_bit_vec::DBVec;
-	use bit_vec_wrap::BitVecWrap;
 	use wavelet_trie::WaveletTrie;
 	use std::collections::HashMap;
-
-	// inserts the sequences statically in a wavelet trie and checks the
-	// ranks of the sequences at the last position when inserted.
-	fn insert_static_and_check(sequences: &[BitVecWrap]) {
-		let wt = WaveletTrie::from_sequences(sequences);
-		assert_ranks(&wt, sequences);
-	}
-
-	fn assert_ranks(wt: &WaveletTrie, sequences: &[BitVecWrap]) {
-		let len = wt.len();
-		let mut sequence_counter = HashMap::new();
-		for sequence in sequences {
-			let counter = sequence_counter.entry(sequence).or_insert(0);
-			*counter += 1;
-		}
-		for (sequence, count) in sequence_counter {
-			assert_eq!(Some(count), wt.rank(sequence, len));
-		}
-	}
 
 	// inserts the sequences statically in a wavelet trie and checks the
 	// ranks of the sequences at the last position when inserted.
@@ -59,29 +39,9 @@ mod tests {
 	}
 
 	#[test]
-	fn insert_one_sequence() {
-		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
-		insert_static_and_check(&[sequence]);
-	}
-
-	#[test]
 	fn insert_one_sequence_d() {
 		let sequence = DBVec::from_bytes(&[0b00001000]);
 		insert_static_and_check_d(&[sequence]);
-	}
-
-	#[test]
-	fn insert_same_sequences() {
-		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
-		let sequence2 = BitVecWrap::from_bytes(&[0b00001000]);
-		insert_static_and_check(&[sequence1, sequence2]);
-	}
-
-	#[test]
-	fn insert_two_different_sequences() {
-		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
-		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
-		insert_static_and_check(&[sequence1, sequence2]);
 	}
 
 	#[test]
@@ -89,28 +49,6 @@ mod tests {
 		let sequence1 = DBVec::from_bytes(&[0b00001000]);
 		let sequence2 = DBVec::from_bytes(&[0b10000000]);
 		insert_static_and_check_d(&[sequence1, sequence2]);
-	}
-
-	#[test]
-	fn insert_different_sequences() {
-		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
-		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
-		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
-		insert_static_and_check(&[sequence1, sequence2, sequence3]);
-	}
-
-	#[test]
-	fn compare_bits_internally() {
-		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
-		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
-		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
-		let wt_bvw = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3]);
-		// dyn-bit-vec stores its bits "backwards" in comparison to bit-vec-wrap
-		let sequenced1 = DBVec::from_bytes(&[0b00010000]);
-		let sequenced2 = DBVec::from_bytes(&[0b10000000]);
-		let sequenced3 = DBVec::from_bytes(&[0b10000100]);
-		let wt_dbv = WaveletTrie::from_sequences_d(&[sequenced1, sequenced2, sequenced3]);
-		wt_bvw.compare_bits_internally(&wt_dbv);
 	}
 
 	#[test]
@@ -168,66 +106,6 @@ mod tests {
 		assert_eq!(Some(1), wt.rank_d(&sequence2, 2));
 		assert_eq!(Some(1), wt.rank_d(&sequence3, 3));
 		assert_eq!(Some(1), wt.rank_d(&sequence4, 4));
-	}
-
-	#[test]
-	fn rank() {
-		// this tests the binary example from the paper
-		// see also example.txt in de root of this repo
-
-		// 0001
-		let mut s1 = BitVecWrap::new();
-		s1.push(false);
-		s1.push(false);
-		s1.push(false);
-		s1.push(true);
-
-		// 0011
-		let mut s2 = BitVecWrap::new();
-		s2.push(false);
-		s2.push(false);
-		s2.push(true);
-		s2.push(true);
-
-		// 0100
-		let mut s3 = BitVecWrap::new();
-		s3.push(false);
-		s3.push(true);
-		s3.push(false);
-		s3.push(false);
-
-		// 00100
-		let mut s4 = BitVecWrap::new();
-		s4.push(false);
-		s4.push(false);
-		s4.push(true);
-		s4.push(false);
-		s4.push(false);
-
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
-		let wt = WaveletTrie::from_sequences(sequences);
-		println!("{:?}", wt);
-
-		assert_eq!(Some(0), wt.rank(&s3, 0));
-		assert_eq!(Some(0), wt.rank(&s3, 2));
-		assert_eq!(Some(1), wt.rank(&s3, 3));
-		assert_eq!(Some(1), wt.rank(&s3, 4));
-		assert_eq!(Some(2), wt.rank(&s3, 5));
-		assert_eq!(Some(2), wt.rank(&s3, 6));
-		assert_eq!(Some(3), wt.rank(&s3, 7));
-
-		let mut seq_0 = BitVecWrap::new();
-		seq_0.push(false);
-		for number in 0..7 {
-			assert_eq!(Some(number), wt.rank(&seq_0, number));
-		}
-
-		let mut seq_none = BitVecWrap::new();
-		seq_none.push(false);
-		seq_none.push(false);
-		seq_none.push(false);
-		seq_none.push(false);
-		assert_eq!(None, wt.rank(&seq_none, 7));
 	}
 
 	#[test]
@@ -291,32 +169,11 @@ mod tests {
 	}
 
 	#[test]
-	fn insert_dynamic_one_sequence() {
-		let sequence = BitVecWrap::from_bytes(&[0b00001000]);
-		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.insert(&sequence, 0));
-		assert_ranks(&wt, &[sequence])
-	}
-
-	#[test]
 	fn insert_dynamic_one_sequence_d() {
 		let sequence = DBVec::from_bytes(&[0b00001000]);
 		let mut wt = WaveletTrie::new();
 		assert_eq!(Ok(()), wt.insert_d(&sequence, 0));
 		assert_ranks_d(&wt, &[sequence])
-	}
-
-	#[test]
-	fn insert_dynamic_out_of_order() {
-		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
-		let sequence2 = BitVecWrap::from_bytes(&[0b00001000]);
-		let sequence3 = BitVecWrap::from_bytes(&[0b00011000]);
-		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.insert(&sequence1, 0));
-		assert_eq!(Ok(()), wt.insert(&sequence2, 1));
-		assert_eq!(Ok(()), wt.insert(&sequence3, 0));
-		let sequences = &[sequence1, sequence2, sequence3];
-		assert_ranks(&wt, sequences);
 	}
 
 	#[test]
@@ -330,53 +187,6 @@ mod tests {
 		assert_eq!(Ok(()), wt.insert_d(&sequence3, 0));
 		let sequences = &[sequence1, sequence2, sequence3];
 		assert_ranks_d(&wt, sequences);
-	}
-
-	#[test]
-	fn insert_example_dynamic_in_order() {
-		// 0001
-		let mut s1 = BitVecWrap::new();
-		s1.push(false);
-		s1.push(false);
-		s1.push(false);
-		s1.push(true);
-
-		// 0011
-		let mut s2 = BitVecWrap::new();
-		s2.push(false);
-		s2.push(false);
-		s2.push(true);
-		s2.push(true);
-
-		// 0100
-		let mut s3 = BitVecWrap::new();
-		s3.push(false);
-		s3.push(true);
-		s3.push(false);
-		s3.push(false);
-
-		// 00100
-		let mut s4 = BitVecWrap::new();
-		s4.push(false);
-		s4.push(false);
-		s4.push(true);
-		s4.push(false);
-		s4.push(false);
-
-		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.insert(&s1, 0));
-		assert_eq!(Ok(()), wt.insert(&s2, 1));
-		assert_eq!(Ok(()), wt.insert(&s3, 2));
-		assert_eq!(Ok(()), wt.insert(&s4, 3));
-		assert_eq!(Ok(()), wt.insert(&s3, 4));
-		assert_eq!(Ok(()), wt.insert(&s4, 5));
-		assert_eq!(Ok(()), wt.insert(&s3, 6));
-		assert_eq!(Ok(()), wt.insert(&s3, 7));
-		
-		println!("{:?}", wt);
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
-		assert_ranks(&wt, sequences);
-		wt.print_stats();
 	}
 
 	#[test]
@@ -472,51 +282,6 @@ mod tests {
 	}
 
 	#[test]
-	fn insert_example_dynamic_out_of_order() {
-		// 0001
-		let mut s1 = BitVecWrap::new();
-		s1.push(false);
-		s1.push(false);
-		s1.push(false);
-		s1.push(true);
-
-		// 0011
-		let mut s2 = BitVecWrap::new();
-		s2.push(false);
-		s2.push(false);
-		s2.push(true);
-		s2.push(true);
-
-		// 0100
-		let mut s3 = BitVecWrap::new();
-		s3.push(false);
-		s3.push(true);
-		s3.push(false);
-		s3.push(false);
-
-		// 00100
-		let mut s4 = BitVecWrap::new();
-		s4.push(false);
-		s4.push(false);
-		s4.push(true);
-		s4.push(false);
-		s4.push(false);
-
-		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.insert(&s1, 0));
-		assert_eq!(Ok(()), wt.insert(&s3, 1));
-		assert_eq!(Ok(()), wt.insert(&s3, 2));
-		assert_eq!(Ok(()), wt.insert(&s3, 3));
-		assert_eq!(Ok(()), wt.insert(&s4, 3));
-		assert_eq!(Ok(()), wt.insert(&s4, 2));
-		assert_eq!(Ok(()), wt.insert(&s2, 1));
-		assert_eq!(Ok(()), wt.insert(&s3, 6));
-		println!("{:?}", wt);
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
-		assert_ranks(&wt, sequences);
-	}
-
-	#[test]
 	fn append_d() {
 		// 0001
 		let mut s1 = DBVec::new();
@@ -563,69 +328,6 @@ mod tests {
 	}
 
 	#[test]
-	fn append() {
-		// 0001
-		let mut s1 = BitVecWrap::new();
-		s1.push(false);
-		s1.push(false);
-		s1.push(false);
-		s1.push(true);
-
-		// 0011
-		let mut s2 = BitVecWrap::new();
-		s2.push(false);
-		s2.push(false);
-		s2.push(true);
-		s2.push(true);
-
-		// 0100
-		let mut s3 = BitVecWrap::new();
-		s3.push(false);
-		s3.push(true);
-		s3.push(false);
-		s3.push(false);
-
-		// 00100
-		let mut s4 = BitVecWrap::new();
-		s4.push(false);
-		s4.push(false);
-		s4.push(true);
-		s4.push(false);
-		s4.push(false);
-
-		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.append(&s1));
-		assert_eq!(Ok(()), wt.append(&s2));
-		assert_eq!(Ok(()), wt.append(&s3));
-		assert_eq!(Ok(()), wt.append(&s4));
-		assert_eq!(Ok(()), wt.append(&s3));
-		assert_eq!(Ok(()), wt.append(&s4));
-		assert_eq!(Ok(()), wt.append(&s3));
-		assert_eq!(Ok(()), wt.append(&s3));
-
-		println!("{:?}", wt);
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
-		assert_ranks(&wt, sequences);
-	}
-
-	#[test]
-	fn access() {
-		let sequence1 = BitVecWrap::from_bytes(&[0b00001000]);
-		let sequence2 = BitVecWrap::from_bytes(&[0b00000001]);
-		let sequence3 = BitVecWrap::from_bytes(&[0b00100001]);
-		let sequences = &[sequence1.copy(), sequence2.copy(), sequence3.copy()];
-		let wt = WaveletTrie::from_sequences(sequences);
-		println!("{:?}", wt);
-		assert_ranks(&wt, sequences);
-		let pos_0_seq = wt.access(0);
-		assert_eq!(sequence1, pos_0_seq);
-		let pos_1_seq = wt.access(1);
-		assert_eq!(sequence2, pos_1_seq);
-		let pos_2_seq = wt.access(2);
-		assert_eq!(sequence3, pos_2_seq);
-	}
-
-	#[test]
 	fn access_d() {
 		let sequence1 = DBVec::from_bytes(&[0b00010000]);
 		let sequence2 = DBVec::from_bytes(&[0b10000000]);
@@ -640,61 +342,6 @@ mod tests {
 		assert_eq!(sequence2, pos_1_seq);
 		let pos_2_seq = wt.access_d(2);
 		assert_eq!(sequence3, pos_2_seq);
-	}
-
-	#[test]
-	fn select() {
-		// 0001
-		let mut s1 = BitVecWrap::new();
-		s1.push(false);
-		s1.push(false);
-		s1.push(false);
-		s1.push(true);
-
-		// 0011
-		let mut s2 = BitVecWrap::new();
-		s2.push(false);
-		s2.push(false);
-		s2.push(true);
-		s2.push(true);
-
-		// 0100
-		let mut s3 = BitVecWrap::new();
-		s3.push(false);
-		s3.push(true);
-		s3.push(false);
-		s3.push(false);
-
-		// 00100
-		let mut s4 = BitVecWrap::new();
-		s4.push(false);
-		s4.push(false);
-		s4.push(true);
-		s4.push(false);
-		s4.push(false);
-
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
-		let wt = WaveletTrie::from_sequences(sequences);
-
-		assert_eq!(Some(0), wt.select(&s1, 1));	// means: the first occurrence of s1 is at index 0!
-		assert_eq!(None, wt.select(&s1, 2));	// there is no more s1 further in the trie
-		assert_eq!(Some(1), wt.select(&s2, 1));	// s2 first occurs at index 1
-		assert_eq!(Some(2), wt.select(&s3, 1));
-		assert_eq!(Some(4), wt.select(&s3, 2));
-		assert_eq!(Some(6), wt.select(&s3, 3));
-		assert_eq!(None, wt.select(&s3, 4));
-		assert_eq!(Some(3), wt.select(&s4, 1));
-		assert_eq!(Some(5), wt.select(&s4, 2));
-		assert_eq!(Some(2), wt.select(&s3, 1));
-		assert_eq!(Some(4), wt.select(&s3, 2));
-		assert_eq!(Some(6), wt.select(&s3, 3));
-		assert_eq!(None, wt.select(&s3, 4));
-		assert_eq!(Some(3), wt.select(&s4, 1));
-		assert_eq!(Some(5), wt.select(&s4, 2));
-		assert_eq!(Some(2), wt.select(&s3, 1));
-		assert_eq!(Some(4), wt.select(&s3, 2));
-		assert_eq!(Some(6), wt.select(&s3, 3));
-		assert_eq!(None, wt.select(&s3, 4));
 	}
 
 	#[test]
@@ -753,56 +400,6 @@ mod tests {
 	}
 
 	#[test]
-	fn select_all() {
-		// 0001
-		let mut s1 = BitVecWrap::new();
-		s1.push(false);
-		s1.push(false);
-		s1.push(false);
-		s1.push(true);
-
-		// 0011
-		let mut s2 = BitVecWrap::new();
-		s2.push(false);
-		s2.push(false);
-		s2.push(true);
-		s2.push(true);
-
-		// 0100
-		let mut s3 = BitVecWrap::new();
-		s3.push(false);
-		s3.push(true);
-		s3.push(false);
-		s3.push(false);
-
-		// 00100
-		let mut s4 = BitVecWrap::new();
-		s4.push(false);
-		s4.push(false);
-		s4.push(true);
-		s4.push(false);
-		s4.push(false);
-
-		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
-		let wt = WaveletTrie::from_sequences(sequences);
-
-		assert_eq!(vec![0], wt.select_all(&s1));
-		assert_eq!(vec![1], wt.select_all(&s2));
-		assert_eq!(vec![2, 4, 6], wt.select_all(&s3));
-		assert_eq!(vec![3, 5], wt.select_all(&s4));
-		let empty_vec: Vec<usize> = Vec::new();
-		assert_eq!(empty_vec, wt.select_all(&BitVecWrap::from_elem(16, true))); //not in trie
-
-		let mut existing_prefix = BitVecWrap::new();
-		existing_prefix.push(false);
-		existing_prefix.push(false);
-		assert_eq!(vec![0, 1, 3, 5], wt.select_all(&existing_prefix));
-
-		let prefix_zero = BitVecWrap::from_elem(0, false);
-		assert_eq!(vec![0, 1, 2, 3, 4, 5, 6], wt.select_all(&prefix_zero));
-	}
-
-	#[test]
 	fn select_all_d() {
 		// 0001
 		let mut s1 = DBVec::new();
@@ -853,24 +450,6 @@ mod tests {
 	}
 
 	#[test]
-	fn str_ops() {
-		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.append_str("Dit is een test"));
-		assert_eq!(Ok(()), wt.append_str("Dit is een teletubbie"));
-		println!("{:?}", wt);
-		assert_eq!(Some(2), wt.rank_str("Dit is", 2));
-		assert_eq!(None, wt.rank_str("st", 2));
-		assert_eq!(Some(1), wt.rank_str("Dit is een tele", 2));
-		assert_eq!(String::from("Dit is een test"), wt.access_str(0).unwrap());
-		assert_eq!(String::from("Dit is een teletubbie"), wt.access_str(1).unwrap());
-		assert_eq!(Some(0), wt.select_str("Dit is een test", 1));
-		assert_eq!(Some(1), wt.select_str("Dit is een teletubbie", 1));
-		assert_eq!(Some(1), wt.select_str("Dit is een te", 2));
-		assert_eq!(vec![0, 1], wt.select_all_str("Dit is een"));
-		wt.print_stats();
-	}
-
-	#[test]
 	fn str_ops_d() {
 		let mut wt = WaveletTrie::new();
 		assert_eq!(Ok(()), wt.append_str_d("Dit is een test"));
@@ -889,24 +468,204 @@ mod tests {
 	}
 
 	#[test]
-	fn delete() {
-		let s1 = BitVecWrap::from_bytes(&[0b00010011]);
-		let s2 = BitVecWrap::from_bytes(&[0b00010110]);
-		let s3 = BitVecWrap::from_bytes(&[0b00010111]);
-		let mut wt = WaveletTrie::from_sequences(&[s1.copy(), s2.copy(), s3.copy()]);
-		println!("{:?}", wt);
-		wt.delete(1);
-		assert_eq!(Some(1), wt.rank(&s1, 1));
-		assert_eq!(Some(1), wt.rank(&s3, 2));
-		assert_eq!(None, wt.rank(&s2, 2));
-		println!("{:?}", wt);
-		wt.delete(1);
-		println!("{:?}", wt);
-		assert_eq!(Some(1), wt.rank(&s1, 1));
-		assert_eq!(None, wt.rank(&s3, 1));
-		wt.delete(0);
-		println!("{:?}", wt);
-		assert_eq!(None, wt.rank(&s1, 0));
-	}
+	fn access_str() {
+		let mut wt = WaveletTrie::new();
+		let str_vec = vec!(
+			"<http://dbpedia.org/ontology/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .",
+			"<http://dbpedia.org/ontology/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocommons/voaf#Vocabulary> .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/vocab/vann/preferredNamespacePrefix> \"dbo\" .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/vocab/vann/preferredNamespaceUri> \"http://dbpedia.org/ontology/\" .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/dc/terms/title> \"The DBpedia Ontology\"@en .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/dc/terms/description> \"\\n              The DBpedia ontology provides the classes and properties used in the DBpedia data set.\\n            \"@en .",
+			"<http://dbpedia.org/ontology/> <http://xmlns.com/foaf/0.1/homepage> <http://wiki.dbpedia.org/Ontology> .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/dc/terms/source> <http://mappings.dbpedia.org> .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/dc/terms/publisher> \"DBpedia Maintainers\" .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/dc/terms/creator> \"DBpedia Maintainers and Contributors\" .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/dc/terms/issued> \"2008-11-17T12:00Z\" .",
+			"<http://dbpedia.org/ontology/> <http://purl.org/dc/terms/modified> \"2017-01-16T16:04Z\" .",
+			"<http://dbpedia.org/ontology/> <http://www.w3.org/2002/07/owl#versionInfo> \"4.2-SNAPSHOT\"@en .",
+			"<http://dbpedia.org/ontology/> <http://www.w3.org/2000/01/rdf-schema#comment> \"\\n              This ontology is generated from the manually created specifications in the DBpedia Mappings\\n              Wiki. Each release of this ontology corresponds to a new release of the DBpedia data set which\\n              contains instance data extracted from the different language versions of Wikipedia. For\\n              information regarding changes in this ontology, please refer to the DBpedia Mappings Wiki.\\n            \"@en .",
+			"<http://dbpedia.org/ontology/> <http://creativecommons.org/ns#license> <http://www.gnu.org/copyleft/fdl.html> .",
+			"<http://dbpedia.org/ontology/> <http://creativecommons.org/ns#license> <http://creativecommons.org/licenses/by-sa/3.0/> .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"Basketball-Liga\"@de .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"basketball league\"@en .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"Ομοσπονδία Καλαθοσφαίρισης\"@el .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"バスケットボールリーグ\"@ja .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"basketbal competitie\"@nl .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"lega di pallacanestro\"@it .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"농구 리그\"@ko .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"ligue de basketball\"@fr .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"sraith cispheile\"@ga .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#label> \"liga de baloncesto\"@es .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#comment> \"a group of sports teams that compete against each other in Basketball\"@en .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/SportsLeague> .",
+			"<http://dbpedia.org/ontology/BasketballLeague> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:BasketballLeague> .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/2000/01/rdf-schema#label> \"Naturereignis\"@de .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/2000/01/rdf-schema#label> \"natural event\"@en .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/2000/01/rdf-schema#label> \"φυσικό γεγονός\"@el .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/2000/01/rdf-schema#label> \"gebeurtenis in de natuur\"@nl .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/2000/01/rdf-schema#label> \"evento naturale\"@it .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/2000/01/rdf-schema#comment> \"Το φυσικό γεγονός χρησιμοποιείται για να περιγράψει ένα συμβάν που πραγματοποιείται φυσικά\"@el .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Event> .",
+			"<http://dbpedia.org/ontology/NaturalEvent> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:NaturalEvent> .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#label> \"Provinz\"@de .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#label> \"province\"@en .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#label> \"επαρχία\"@el .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#label> \"英語圏の行政区画\"@ja .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#label> \"provincie\"@nl .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#label> \"province\"@fr .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#label> \"cúige\"@ga .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#comment> \"An administrative body governing a territorial unity on the intermediate level, between local and national level\"@en .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#comment> \"Είναι διοικητική δομή του κράτους που διοικεί μια περιοχή που είναι σε έκταση μεγαλύτερη από τοπικό επίπεδο και μικρότερη από εθνικό επίπεδο.\"@el .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/GovernmentalAdministrativeRegion> .",
+			"<http://dbpedia.org/ontology/Province> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:Province> .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2000/01/rdf-schema#label> \"Mondkrater\"@de .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2000/01/rdf-schema#label> \"cratera lunar\"@pt .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2000/01/rdf-schema#label> \"lunar crater\"@en .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2000/01/rdf-schema#label> \"Σεληνιακός κρατήρας\"@el .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2000/01/rdf-schema#label> \"maankrater\"@nl .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2000/01/rdf-schema#label> \"cratère lunaire\"@fr .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2000/01/rdf-schema#label> \"cráitéar gealaí\"@ga .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Crater> .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/2002/07/owl#equivalentClass> <http://www.wikidata.org/entity/Q1348589> .",
+			"<http://dbpedia.org/ontology/LunarCrater> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:LunarCrater> .",
+			"<http://dbpedia.org/ontology/MotorsportSeason> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/MotorsportSeason> <http://www.w3.org/2000/01/rdf-schema#label> \"motorsport season\"@en .",
+			"<http://dbpedia.org/ontology/MotorsportSeason> <http://www.w3.org/2000/01/rdf-schema#label> \"motorsportseizoen\"@nl .",
+			"<http://dbpedia.org/ontology/MotorsportSeason> <http://www.w3.org/2000/01/rdf-schema#label> \"Motorsportsaison\"@de .",
+			"<http://dbpedia.org/ontology/MotorsportSeason> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/SportsSeason> .",
+			"<http://dbpedia.org/ontology/MotorsportSeason> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:MotorsportSeason> .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#label> \"militärische Person\"@de .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#label> \"military person\"@en .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#label> \"στρατιωτικός\"@el .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#label> \"軍人\"@ja .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#label> \"militair\"@nl .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#label> \"militare\"@it .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#label> \"군인\"@ko .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#label> \"militaire\"@fr .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Person> .",
+			"<http://dbpedia.org/ontology/MilitaryPerson> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:MilitaryPerson> .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2000/01/rdf-schema#label> \"Zeitraum\"@de .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2000/01/rdf-schema#label> \"time period\"@en .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2000/01/rdf-schema#label> \"χρονική περίοδος\"@el .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2000/01/rdf-schema#label> \"tijdvak\"@nl .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2000/01/rdf-schema#label> \"période temporelle\"@fr .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2000/01/rdf-schema#label> \"tréimhse\"@ga .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2000/01/rdf-schema#label> \"periodo temporal\"@es .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/2002/07/owl#disjointWith> <http://dbpedia.org/ontology/Person> .",
+			"<http://dbpedia.org/ontology/TimePeriod> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:TimePeriod> .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"Fahrzeugmotor\"@de .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"motor de automóvel\"@pt .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"automobile engine\"@en .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"κινητήρας αυτοκινήτου\"@el .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"内燃機関\"@ja .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"automotor\"@nl .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"motore d'automobile\"@it .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"자동차 엔진\"@ko .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"moteur d'automobile\"@fr .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#label> \"inneall gluaisteáin\"@ga .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Engine> .",
+			"<http://dbpedia.org/ontology/AutomobileEngine> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:AutomobileEngine> .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"Archäologe\"@de .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"archeologist\"@en .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"Αρχαιολόγος\"@el .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"考古学者\"@ja .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"archeoloog\"@nl .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"archéologue\"@fr .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"archeolog\"@pl .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"seandálaí\"@ga .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#label> \"Arqueólogo\"@es .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Person> .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/2002/07/owl#equivalentClass> <http://www.wikidata.org/entity/Q3621491> .",
+			"<http://dbpedia.org/ontology/Archeologist> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:Archeologist> .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#label> \"Enzym\"@de .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#label> \"enzyme\"@en .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#label> \"ένζυμο\"@el .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#label> \"酵素\"@ja .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#label> \"enzym\"@nl .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#label> \"enzima\"@it .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#label> \"효소\"@ko .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#label> \"einsím\"@ga .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Biomolecule> .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/2002/07/owl#equivalentClass> <http://www.wikidata.org/entity/Q8047> .",
+			"<http://dbpedia.org/ontology/Enzyme> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:Enzyme> .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/2000/01/rdf-schema#label> \"songwriter\"@en .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/2000/01/rdf-schema#label> \"Liedschreiber\"@de .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/2000/01/rdf-schema#label> \"songwriter (tekstdichter)\"@nl .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/2000/01/rdf-schema#label> \"auteur-compositeur\"@fr .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/2000/01/rdf-schema#comment> \"a person who writes songs.\"@en .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/2000/01/rdf-schema#comment> \"een persoon die de muziek en/of de tekst voor populaire muzieknummers schrijft.\"@nl .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Writer> .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/2002/07/owl#equivalentClass> <http://www.wikidata.org/entity/Q753110> .",
+			"<http://dbpedia.org/ontology/SongWriter> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:SongWriter> .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/2000/01/rdf-schema#label> \"Platz\"@de .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/2000/01/rdf-schema#label> \"square\"@en .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/2000/01/rdf-schema#label> \"正方形\"@ja .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/2000/01/rdf-schema#label> \"plein\"@nl .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/2000/01/rdf-schema#label> \"place\"@fr .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/2000/01/rdf-schema#label> \"cearnóg\"@ga .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/ArchitecturalStructure> .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/2002/07/owl#equivalentClass> <http://www.wikidata.org/entity/Q174782> .",
+			"<http://dbpedia.org/ontology/Square> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:Square> .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"Universität\"@de .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"universidade\"@pt .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"university\"@en .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"πανεπιστήμιο\"@el .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"大学\"@ja .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"universiteit\"@nl .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"대학\"@ko .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"université\"@fr .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"uniwersytet\"@pl .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"ollscoil\"@ga .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#label> \"universidad\"@es .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/EducationalInstitution> .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2002/07/owl#equivalentClass> <http://schema.org/CollegeOrUniversity> .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/2002/07/owl#equivalentClass> <http://www.wikidata.org/entity/Q3918> .",
+			"<http://dbpedia.org/ontology/University> <http://www.w3.org/ns/prov#wasDerivedFrom> <http://mappings.dbpedia.org/index.php/OntologyClass:University> .",
+			"<http://dbpedia.org/ontology/AnatomicalStructure> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .",
+			"<http://dbpedia.org/ontology/AnatomicalStructure> <http://www.w3.org/2000/01/rdf-schema#label> \"anatomska struktura\"@sl ."
+		);
 
+		let mut failed = false;
+		let mut prev_wt = wt.clone();
+		for string_nr in 0..str_vec.len() {
+			let current_str = str_vec.get(string_nr).unwrap();
+			match wt.append_str_d(current_str) {
+				Ok(_) => {
+					println!("string_nr: {} - wt.len(): {}", string_nr, wt.len_d());
+					for test_nr in 0..string_nr + 1 {
+						let string = str_vec.get(test_nr).unwrap();
+						let string_in_wt = wt.access_str_d(test_nr as u64).unwrap();
+						if !(string == &string_in_wt) {
+							failed = true;
+							println!("+++\nlatest str:       [{}], line {}", current_str, string_nr + 1);
+							println!("tested str:       [{}], line {}", string, test_nr + 1);
+							println!("tested str in wt: [{}]", string_in_wt);
+	//						assert_eq!(string, &string_in_wt);
+						}
+					}
+					if failed {
+						println!("-----------------\nprev wt: {:?}", prev_wt);
+						println!("-----------------\n     wt: {:?}", wt);
+						break;
+					}
+					prev_wt = wt.clone();
+				},
+				Err(reason) => println!("{}", reason)
+			};
+		}
+	}
 }
