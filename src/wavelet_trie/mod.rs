@@ -51,7 +51,10 @@ impl WaveletTrie {
 				// find longest common prefix
 				self.prefix_d = first_sequence.clone();
 				for sequence in sequences {
-					self.prefix_d = self.prefix_d.longest_common_prefix(sequence);
+					let new_prefix = self.prefix_d.longest_common_prefix(sequence);
+					if new_prefix.len() < self.prefix_d.len() {
+						self.prefix_d = new_prefix;
+					}
 				}
 				// split accordingly
 				let mut left_sequences: Vec<DBVec> = Vec::new();
