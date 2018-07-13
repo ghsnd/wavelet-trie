@@ -23,3 +23,8 @@ Compressed Space_. Proceedings of the ACM SIGACT-SIGMOD-SIGART Symposium on Prin
 * Helper methods to work with texts.
 * Range methods
 * Many optimisations!
+
+## A note on performance
+Since this library heavily depends on the CPU feature [POPCNT](https://en.wikipedia.org/wiki/SSE4#POPCNT_and_LZCNT), it might be a good idea to include a `.cargo/config`file in your project and enable certain compiler flags and boost performance. The commented-out example in this repository optimises the code for the CPU it is compiled on. This makes the resulting binary not very portable though.
+
+See also <https://doc.rust-lang.org/cargo/reference/config.html>.
