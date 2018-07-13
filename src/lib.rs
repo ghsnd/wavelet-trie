@@ -60,17 +60,17 @@
 /// let sequence4 = DBVec::from_bytes(&[0b11000100, 0b10000000]);
 ///
 /// // Here we create a wavelet trie from these sequences
-/// let wt = WaveletTrie::from_sequences_d(&[sequence1, sequence2, sequence3, sequence4]);
+/// let wt = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3, sequence4]);
 ///
 /// // There should be 4 sequences in the trie now:
-/// assert_eq!(4, wt.len_d());
+/// assert_eq!(4, wt.len());
 ///
 /// // Let's see at which positions prefix '001' occurs (should be 2 and 3).
 /// let mut prefix_001 = DBVec::new();
 /// prefix_001.push(false);
 /// prefix_001.push(false);
 /// prefix_001.push(true);
-/// assert_eq!(vec![2, 3], wt.select_all_d(&prefix_001));
+/// assert_eq!(vec![2, 3], wt.select_all(&prefix_001));
 ///
 /// // 
 /// ```

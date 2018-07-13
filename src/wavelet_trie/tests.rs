@@ -7,48 +7,48 @@ mod tests {
 
 	// inserts the sequences statically in a wavelet trie and checks the
 	// ranks of the sequences at the last position when inserted.
-	fn insert_static_and_check_d(sequences: &[DBVec]) {
-		let wt = WaveletTrie::from_sequences_d(sequences);
+	fn insert_static_and_check(sequences: &[DBVec]) {
+		let wt = WaveletTrie::from_sequences(sequences);
 		println!("{:?}", wt);
-		assert_ranks_d(&wt, sequences);
+		assert_ranks(&wt, sequences);
 	}
 
-	fn assert_ranks_d(wt: &WaveletTrie, sequences: &[DBVec]) {
-		let len = wt.len_d();
+	fn assert_ranks(wt: &WaveletTrie, sequences: &[DBVec]) {
+		let len = wt.len();
 		let mut sequence_counter = HashMap::new();
 		for sequence in sequences {
 			let counter = sequence_counter.entry(sequence).or_insert(0);
 			*counter += 1;
 		}
 		for (sequence, count) in sequence_counter {
-			assert_eq!(Some(count), wt.rank_d(sequence, len));
+			assert_eq!(Some(count), wt.rank(sequence, len));
 		}
 	}
 
 	#[test]
-	fn insert_static_d() {
+	fn insert_static() {
 		let sequence = DBVec::from_bytes(&[0b00001000]);
-		insert_static_and_check_d(&[sequence]);
+		insert_static_and_check(&[sequence]);
 	}
 
 	#[test]
-	fn insert_same_sequences_d() {
+	fn insert_same_sequences() {
 		let sequence1 = DBVec::from_bytes(&[0b00001000]);
 		let sequence2 = DBVec::from_bytes(&[0b00001000]);
-		insert_static_and_check_d(&[sequence1, sequence2]);
+		insert_static_and_check(&[sequence1, sequence2]);
 	}
 
 	#[test]
-	fn insert_one_sequence_d() {
+	fn insert_one_sequence() {
 		let sequence = DBVec::from_bytes(&[0b00001000]);
-		insert_static_and_check_d(&[sequence]);
+		insert_static_and_check(&[sequence]);
 	}
 
 	#[test]
-	fn insert_two_different_sequences_d() {
+	fn insert_two_different_sequences() {
 		let sequence1 = DBVec::from_bytes(&[0b00001000]);
 		let sequence2 = DBVec::from_bytes(&[0b10000000]);
-		insert_static_and_check_d(&[sequence1, sequence2]);
+		insert_static_and_check(&[sequence1, sequence2]);
 	}
 
 	#[test]
@@ -57,7 +57,7 @@ mod tests {
 		let sequence2 = DBVec::from_u32_slice(&[0b01110100011101000110100000111100, 0b00101111001011110011101001110000, 0b01100101011100000110001001100100, 0b00101110011000010110100101100100, 0b00101111011001110111001001101111, 0b01101111011101000110111001101111, 0b01111001011001110110111101101100, 0b00111100001000000011111000101111, 0b01110000011101000111010001101000, 0b01110111001011110010111100111010, 0b01110111001011100111011101110111, 0b01110010011011110010111000110011, 0b00111001001100010010111101100111, 0b00110000001011110011100100111001, 0b00110010001100100010111100110010, 0b01100110011001000111001000101101, 0b01101110011110010111001100101101, 0b00101101011110000110000101110100, 0b01110100001000110111001101101110, 0b00111110011001010111000001111001, 0b01110100011010000011110000100000, 0b00101111001110100111000001110100, 0b01110010011101010111000000101111, 0b01110010011011110010111001101100, 0b01101111011101100010111101100111, 0b01101101011011010110111101100011, 0b00101111011100110110111001101111, 0b01100110011000010110111101110110, 0b01100011011011110101011000100011, 0b01101100011101010110001001100001, 0b00111110011110010111001001100001, 0b00000000000000000010111000100000]);
 		let sequence3 = DBVec::from_u32_slice(&[0b01110100011101000110100000111100, 0b00101111001011110011101001110000, 0b01100101011100000110001001100100, 0b00101110011000010110100101100100, 0b00101111011001110111001001101111, 0b01101111011101000110111001101111, 0b01111001011001110110111101101100, 0b00111100001000000011111000101111, 0b01110000011101000111010001101000, 0b01110000001011110010111100111010, 0b00101110011011000111001001110101, 0b00101111011001110111001001101111, 0b01100001011000110110111101110110, 0b01100001011101100010111101100010, 0b01110000001011110110111001101110, 0b01100101011001100110010101110010, 0b01100100011001010111001001110010, 0b01100101011011010110000101001110, 0b01100011011000010111000001110011, 0b01100101011100100101000001100101, 0b00111110011110000110100101100110, 0b01100010011001000010001000100000, 0b00101110001000000010001001101111, 0b00000000000000000000000000000000]);
 		let sequence4 = DBVec::from_u32_slice(&[0b01110100011101000110100000111100, 0b00101111001011110011101001110000, 0b01100101011100000110001001100100, 0b00101110011000010110100101100100, 0b00101111011001110111001001101111, 0b01101111011101000110111001101111, 0b01111001011001110110111101101100, 0b00111100001000000011111000101111, 0b01110000011101000111010001101000, 0b01110000001011110010111100111010, 0b00101110011011000111001001110101, 0b00101111011001110111001001101111, 0b01100001011000110110111101110110, 0b01100001011101100010111101100010, 0b01110000001011110110111001101110, 0b01100101011001100110010101110010, 0b01100100011001010111001001110010, 0b01100101011011010110000101001110, 0b01100011011000010111000001110011, 0b01101001011100100101010101100101, 0b01101000001000100010000000111110, 0b00111010011100000111010001110100, 0b01100010011001000010111100101111, 0b01101001011001000110010101110000, 0b01110010011011110010111001100001, 0b01101110011011110010111101100111, 0b01101111011011000110111101110100, 0b00100010001011110111100101100111, 0b00000000000000000010111000100000]);
-		insert_static_and_check_d(&[sequence1, sequence2, sequence3, sequence4]);
+		insert_static_and_check(&[sequence1, sequence2, sequence3, sequence4]);
 	}
 
 	#[test]
@@ -68,20 +68,20 @@ mod tests {
 		let sequence4 = DBVec::from_u32_slice(&[0b01110100011101000110100000111100, 0b00101111001011110011101001110000, 0b01100101011100000110001001100100, 0b00101110011000010110100101100100, 0b00101111011001110111001001101111, 0b01101111011101000110111001101111, 0b01111001011001110110111101101100, 0b00111100001000000011111000101111, 0b01110000011101000111010001101000, 0b01110000001011110010111100111010, 0b00101110011011000111001001110101, 0b00101111011001110111001001101111, 0b01100001011000110110111101110110, 0b01100001011101100010111101100010, 0b01110000001011110110111001101110, 0b01100101011001100110010101110010, 0b01100100011001010111001001110010, 0b01100101011011010110000101001110, 0b01100011011000010111000001110011, 0b01101001011100100101010101100101, 0b01101000001000100010000000111110, 0b00111010011100000111010001110100, 0b01100010011001000010111100101111, 0b01101001011001000110010101110000, 0b01110010011011110010111001100001, 0b01101110011011110010111101100111, 0b01101111011011000110111101110100, 0b00100010001011110111100101100111, 0b00000000000000000010111000100000]);
 		let mut wt = WaveletTrie::new();
 		println!("*********\n{:?}\n*********", wt);
-		wt.append_d(&sequence1);
+		wt.append(&sequence1);
 		println!("\n*********\n{:?}\n*********", wt);
-		wt.append_d(&sequence2);
+		wt.append(&sequence2);
 		println!("\n*********\n{:?}\n*********", wt);
-		wt.append_d(&sequence3);
+		wt.append(&sequence3);
 		println!("\n*********\n{:?}\n*********", wt);
-		wt.append_d(&sequence4);
+		wt.append(&sequence4);
 		println!("\n*********\n{:?}\n*********", wt);
 
 		// test ranks
-		assert_eq!(Some(1), wt.rank_d(&sequence1, 1));
-		assert_eq!(Some(1), wt.rank_d(&sequence2, 2));
-		assert_eq!(Some(1), wt.rank_d(&sequence3, 3));
-		assert_eq!(Some(1), wt.rank_d(&sequence4, 4));
+		assert_eq!(Some(1), wt.rank(&sequence1, 1));
+		assert_eq!(Some(1), wt.rank(&sequence2, 2));
+		assert_eq!(Some(1), wt.rank(&sequence3, 3));
+		assert_eq!(Some(1), wt.rank(&sequence4, 4));
 	}
 
 	#[test]
@@ -92,24 +92,24 @@ mod tests {
 		let sequence4 = DBVec::from_u32_slice(&[0b01110000001011110010111100111010, 0b01100010011001000010111100101111, 0b01101001011001000110010101110000, 0b01110010011011110010111001100001, 0b01101110011011110010111101100111, 0b01101111011011000110111101110100, 0b00100010001011110111100101100111, 0b00000000000000000010111000100000]);
 		let mut wt = WaveletTrie::new();
 		println!("*********\n{:?}\n*********", wt);
-		wt.append_d(&sequence1);
+		wt.append(&sequence1);
 		println!("\n*********\n{:?}\n*********", wt);
-		wt.append_d(&sequence2);
+		wt.append(&sequence2);
 		println!("\n*********\n{:?}\n*********", wt);
-		wt.append_d(&sequence3);
+		wt.append(&sequence3);
 		println!("\n*********\n{:?}\n*********", wt);
-		wt.append_d(&sequence4);
+		wt.append(&sequence4);
 		println!("\n*********\n{:?}\n*********", wt);
 
 		// test ranks
-		assert_eq!(Some(1), wt.rank_d(&sequence1, 1));
-		assert_eq!(Some(1), wt.rank_d(&sequence2, 2));
-		assert_eq!(Some(1), wt.rank_d(&sequence3, 3));
-		assert_eq!(Some(1), wt.rank_d(&sequence4, 4));
+		assert_eq!(Some(1), wt.rank(&sequence1, 1));
+		assert_eq!(Some(1), wt.rank(&sequence2, 2));
+		assert_eq!(Some(1), wt.rank(&sequence3, 3));
+		assert_eq!(Some(1), wt.rank(&sequence4, 4));
 	}
 
 	#[test]
-	fn rank_d() {
+	fn rank() {
 		// this tests the binary example from the paper
 		// see also example.txt in de root of this repo
 
@@ -143,21 +143,21 @@ mod tests {
 		s4.push(false);
 
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
-		let wt = WaveletTrie::from_sequences_d(sequences);
+		let wt = WaveletTrie::from_sequences(sequences);
 		println!("{:?}", wt);
 
-		assert_eq!(Some(0), wt.rank_d(&s3, 0));
-		assert_eq!(Some(0), wt.rank_d(&s3, 2));
-		assert_eq!(Some(1), wt.rank_d(&s3, 3));
-		assert_eq!(Some(1), wt.rank_d(&s3, 4));
-		assert_eq!(Some(2), wt.rank_d(&s3, 5));
-		assert_eq!(Some(2), wt.rank_d(&s3, 6));
-		assert_eq!(Some(3), wt.rank_d(&s3, 7));
+		assert_eq!(Some(0), wt.rank(&s3, 0));
+		assert_eq!(Some(0), wt.rank(&s3, 2));
+		assert_eq!(Some(1), wt.rank(&s3, 3));
+		assert_eq!(Some(1), wt.rank(&s3, 4));
+		assert_eq!(Some(2), wt.rank(&s3, 5));
+		assert_eq!(Some(2), wt.rank(&s3, 6));
+		assert_eq!(Some(3), wt.rank(&s3, 7));
 
 		let mut seq_0 = DBVec::new();
 		seq_0.push(false);
 		for number in 0..7 {
-			assert_eq!(Some(number), wt.rank_d(&seq_0, number));
+			assert_eq!(Some(number), wt.rank(&seq_0, number));
 		}
 
 		let mut seq_none = DBVec::new();
@@ -165,32 +165,32 @@ mod tests {
 		seq_none.push(false);
 		seq_none.push(false);
 		seq_none.push(false);
-		assert_eq!(None, wt.rank_d(&seq_none, 7));
+		assert_eq!(None, wt.rank(&seq_none, 7));
 	}
 
 	#[test]
-	fn insert_dynamic_one_sequence_d() {
+	fn insert_dynamic_one_sequence() {
 		let sequence = DBVec::from_bytes(&[0b00001000]);
 		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.insert_d(&sequence, 0));
-		assert_ranks_d(&wt, &[sequence])
+		assert_eq!(Ok(()), wt.insert(&sequence, 0));
+		assert_ranks(&wt, &[sequence])
 	}
 
 	#[test]
-	fn insert_dynamic_out_of_order_d() {
+	fn insert_dynamic_out_of_order() {
 		let sequence1 = DBVec::from_bytes(&[0b00001000]);
 		let sequence2 = DBVec::from_bytes(&[0b00001000]);
 		let sequence3 = DBVec::from_bytes(&[0b00011000]);
 		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.insert_d(&sequence1, 0));
-		assert_eq!(Ok(()), wt.insert_d(&sequence2, 1));
-		assert_eq!(Ok(()), wt.insert_d(&sequence3, 0));
+		assert_eq!(Ok(()), wt.insert(&sequence1, 0));
+		assert_eq!(Ok(()), wt.insert(&sequence2, 1));
+		assert_eq!(Ok(()), wt.insert(&sequence3, 0));
 		let sequences = &[sequence1, sequence2, sequence3];
-		assert_ranks_d(&wt, sequences);
+		assert_ranks(&wt, sequences);
 	}
 
 	#[test]
-	fn insert_example_dynamic_in_order_d() {
+	fn insert_example_dynamic_in_order() {
 		// 0001
 		let mut s1 = DBVec::new();
 		s1.push(false);
@@ -221,23 +221,23 @@ mod tests {
 		s4.push(false);
 
 		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.insert_d(&s1, 0));
-		assert_eq!(Ok(()), wt.insert_d(&s2, 1));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 2));
-		assert_eq!(Ok(()), wt.insert_d(&s4, 3));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 4));
-		assert_eq!(Ok(()), wt.insert_d(&s4, 5));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 6));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 7));
+		assert_eq!(Ok(()), wt.insert(&s1, 0));
+		assert_eq!(Ok(()), wt.insert(&s2, 1));
+		assert_eq!(Ok(()), wt.insert(&s3, 2));
+		assert_eq!(Ok(()), wt.insert(&s4, 3));
+		assert_eq!(Ok(()), wt.insert(&s3, 4));
+		assert_eq!(Ok(()), wt.insert(&s4, 5));
+		assert_eq!(Ok(()), wt.insert(&s3, 6));
+		assert_eq!(Ok(()), wt.insert(&s3, 7));
 
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
 		println!("{:?}", wt);
-		assert_ranks_d(&wt, sequences);
-		wt.print_stats_d();
+		assert_ranks(&wt, sequences);
+		wt.print_stats();
 	}
 
 	#[test]
-	fn insert_example_dynamic_out_of_order_d() {
+	fn insert_example_dynamic_out_of_order() {
 		// 0001
 		let mut s1 = DBVec::new();
 		s1.push(false);
@@ -268,21 +268,21 @@ mod tests {
 		s4.push(false);
 
 		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.insert_d(&s1, 0));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 1));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 2));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 3));
-		assert_eq!(Ok(()), wt.insert_d(&s4, 3));
-		assert_eq!(Ok(()), wt.insert_d(&s4, 2));
-		assert_eq!(Ok(()), wt.insert_d(&s2, 1));
-		assert_eq!(Ok(()), wt.insert_d(&s3, 6));
+		assert_eq!(Ok(()), wt.insert(&s1, 0));
+		assert_eq!(Ok(()), wt.insert(&s3, 1));
+		assert_eq!(Ok(()), wt.insert(&s3, 2));
+		assert_eq!(Ok(()), wt.insert(&s3, 3));
+		assert_eq!(Ok(()), wt.insert(&s4, 3));
+		assert_eq!(Ok(()), wt.insert(&s4, 2));
+		assert_eq!(Ok(()), wt.insert(&s2, 1));
+		assert_eq!(Ok(()), wt.insert(&s3, 6));
 		println!("{:?}", wt);
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
-		assert_ranks_d(&wt, sequences);
+		assert_ranks(&wt, sequences);
 	}
 
 	#[test]
-	fn append_d() {
+	fn append() {
 		// 0001
 		let mut s1 = DBVec::new();
 		s1.push(false);
@@ -313,39 +313,39 @@ mod tests {
 		s4.push(false);
 
 		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.append_d(&s1));
-		assert_eq!(Ok(()), wt.append_d(&s2));
-		assert_eq!(Ok(()), wt.append_d(&s3));
-		assert_eq!(Ok(()), wt.append_d(&s4));
-		assert_eq!(Ok(()), wt.append_d(&s3));
-		assert_eq!(Ok(()), wt.append_d(&s4));
-		assert_eq!(Ok(()), wt.append_d(&s3));
-		assert_eq!(Ok(()), wt.append_d(&s3));
+		assert_eq!(Ok(()), wt.append(&s1));
+		assert_eq!(Ok(()), wt.append(&s2));
+		assert_eq!(Ok(()), wt.append(&s3));
+		assert_eq!(Ok(()), wt.append(&s4));
+		assert_eq!(Ok(()), wt.append(&s3));
+		assert_eq!(Ok(()), wt.append(&s4));
+		assert_eq!(Ok(()), wt.append(&s3));
+		assert_eq!(Ok(()), wt.append(&s3));
 
 		println!("{:?}", wt);
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy(), s3.copy()];
-		assert_ranks_d(&wt, sequences);
+		assert_ranks(&wt, sequences);
 	}
 
 	#[test]
-	fn access_d() {
+	fn access() {
 		let sequence1 = DBVec::from_bytes(&[0b00010000]);
 		let sequence2 = DBVec::from_bytes(&[0b10000000]);
 		let sequence3 = DBVec::from_bytes(&[0b10000100]);
 		let sequences = &[sequence1.copy(), sequence2.copy(), sequence3.copy()];
-		let wt = WaveletTrie::from_sequences_d(sequences);
+		let wt = WaveletTrie::from_sequences(sequences);
 		println!("{:?}", wt);
-		assert_ranks_d(&wt, sequences);
-		let pos_0_seq = wt.access_d(0);
+		assert_ranks(&wt, sequences);
+		let pos_0_seq = wt.access(0);
 		assert_eq!(sequence1, pos_0_seq);
-		let pos_1_seq = wt.access_d(1);
+		let pos_1_seq = wt.access(1);
 		assert_eq!(sequence2, pos_1_seq);
-		let pos_2_seq = wt.access_d(2);
+		let pos_2_seq = wt.access(2);
 		assert_eq!(sequence3, pos_2_seq);
 	}
 
 	#[test]
-	fn select_d() {
+	fn select() {
 		// 0001
 		let mut s1 = DBVec::new();
 		s1.push(false);
@@ -376,31 +376,31 @@ mod tests {
 		s4.push(false);
 
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
-		let wt = WaveletTrie::from_sequences_d(sequences);
+		let wt = WaveletTrie::from_sequences(sequences);
 
-		assert_eq!(Some(0), wt.select_d(&s1, 1));	// means: the first occurrence of s1 is at index 0!
-		assert_eq!(None, wt.select_d(&s1, 2));	// there is no more s1 further in the trie
-		assert_eq!(Some(1), wt.select_d(&s2, 1));	// s2 first occurs at index 1
-		assert_eq!(Some(2), wt.select_d(&s3, 1));
-		assert_eq!(Some(4), wt.select_d(&s3, 2));
-		assert_eq!(Some(6), wt.select_d(&s3, 3));
-		assert_eq!(None, wt.select_d(&s3, 4));
-		assert_eq!(Some(3), wt.select_d(&s4, 1));
-		assert_eq!(Some(5), wt.select_d(&s4, 2));
-		assert_eq!(Some(2), wt.select_d(&s3, 1));
-		assert_eq!(Some(4), wt.select_d(&s3, 2));
-		assert_eq!(Some(6), wt.select_d(&s3, 3));
-		assert_eq!(None, wt.select_d(&s3, 4));
-		assert_eq!(Some(3), wt.select_d(&s4, 1));
-		assert_eq!(Some(5), wt.select_d(&s4, 2));
-		assert_eq!(Some(2), wt.select_d(&s3, 1));
-		assert_eq!(Some(4), wt.select_d(&s3, 2));
-		assert_eq!(Some(6), wt.select_d(&s3, 3));
-		assert_eq!(None, wt.select_d(&s3, 4));
+		assert_eq!(Some(0), wt.select(&s1, 1));	// means: the first occurrence of s1 is at index 0!
+		assert_eq!(None, wt.select(&s1, 2));	// there is no more s1 further in the trie
+		assert_eq!(Some(1), wt.select(&s2, 1));	// s2 first occurs at index 1
+		assert_eq!(Some(2), wt.select(&s3, 1));
+		assert_eq!(Some(4), wt.select(&s3, 2));
+		assert_eq!(Some(6), wt.select(&s3, 3));
+		assert_eq!(None, wt.select(&s3, 4));
+		assert_eq!(Some(3), wt.select(&s4, 1));
+		assert_eq!(Some(5), wt.select(&s4, 2));
+		assert_eq!(Some(2), wt.select(&s3, 1));
+		assert_eq!(Some(4), wt.select(&s3, 2));
+		assert_eq!(Some(6), wt.select(&s3, 3));
+		assert_eq!(None, wt.select(&s3, 4));
+		assert_eq!(Some(3), wt.select(&s4, 1));
+		assert_eq!(Some(5), wt.select(&s4, 2));
+		assert_eq!(Some(2), wt.select(&s3, 1));
+		assert_eq!(Some(4), wt.select(&s3, 2));
+		assert_eq!(Some(6), wt.select(&s3, 3));
+		assert_eq!(None, wt.select(&s3, 4));
 	}
 
 	#[test]
-	fn select_all_d() {
+	fn select_all() {
 		// 0001
 		let mut s1 = DBVec::new();
 		s1.push(false);
@@ -431,40 +431,40 @@ mod tests {
 		s4.push(false);
 
 		let sequences = &[s1.copy(), s2.copy(), s3.copy(), s4.copy(), s3.copy(), s4.copy(), s3.copy()];
-		let wt = WaveletTrie::from_sequences_d(sequences);
+		let wt = WaveletTrie::from_sequences(sequences);
 
-		assert_eq!(vec![0], wt.select_all_d(&s1));
-		assert_eq!(vec![1], wt.select_all_d(&s2));
-		assert_eq!(vec![2, 4, 6], wt.select_all_d(&s3));
-		assert_eq!(vec![3, 5], wt.select_all_d(&s4));
+		assert_eq!(vec![0], wt.select_all(&s1));
+		assert_eq!(vec![1], wt.select_all(&s2));
+		assert_eq!(vec![2, 4, 6], wt.select_all(&s3));
+		assert_eq!(vec![3, 5], wt.select_all(&s4));
 		let empty_vec: Vec<u64> = Vec::new();
-		assert_eq!(empty_vec, wt.select_all_d(&DBVec::from_elem(16, true))); //not in trie
+		assert_eq!(empty_vec, wt.select_all(&DBVec::from_elem(16, true))); //not in trie
 
 		let mut existing_prefix = DBVec::new();
 		existing_prefix.push(false);
 		existing_prefix.push(false);
-		assert_eq!(vec![0, 1, 3, 5], wt.select_all_d(&existing_prefix));
+		assert_eq!(vec![0, 1, 3, 5], wt.select_all(&existing_prefix));
 
 		let prefix_zero = DBVec::from_elem(0, false);
-		assert_eq!(vec![0, 1, 2, 3, 4, 5, 6], wt.select_all_d(&prefix_zero));
+		assert_eq!(vec![0, 1, 2, 3, 4, 5, 6], wt.select_all(&prefix_zero));
 	}
 
 	#[test]
-	fn str_ops_d() {
+	fn str_ops() {
 		let mut wt = WaveletTrie::new();
-		assert_eq!(Ok(()), wt.append_str_d("Dit is een test"));
-		assert_eq!(Ok(()), wt.append_str_d("Dit is een teletubbie"));
+		assert_eq!(Ok(()), wt.append_str("Dit is een test"));
+		assert_eq!(Ok(()), wt.append_str("Dit is een teletubbie"));
 		//println!("{:?}", wt);
-		assert_eq!(Some(2), wt.rank_str_d("Dit is", 2));
-		assert_eq!(None, wt.rank_str_d("st", 2));
-		assert_eq!(Some(1), wt.rank_str_d("Dit is een tele", 2));
-		assert_eq!(String::from("Dit is een test"), wt.access_str_d(0).unwrap());
-		assert_eq!(String::from("Dit is een teletubbie"), wt.access_str_d(1).unwrap());
-		assert_eq!(Some(0), wt.select_str_d("Dit is een test", 1));
-		assert_eq!(Some(1), wt.select_str_d("Dit is een teletubbie", 1));
-		assert_eq!(Some(1), wt.select_str_d("Dit is een te", 2));
-		assert_eq!(vec![0, 1], wt.select_all_str_d("Dit is een"));
-		wt.print_stats_d();
+		assert_eq!(Some(2), wt.rank_str("Dit is", 2));
+		assert_eq!(None, wt.rank_str("st", 2));
+		assert_eq!(Some(1), wt.rank_str("Dit is een tele", 2));
+		assert_eq!(String::from("Dit is een test"), wt.access_str(0).unwrap());
+		assert_eq!(String::from("Dit is een teletubbie"), wt.access_str(1).unwrap());
+		assert_eq!(Some(0), wt.select_str("Dit is een test", 1));
+		assert_eq!(Some(1), wt.select_str("Dit is een teletubbie", 1));
+		assert_eq!(Some(1), wt.select_str("Dit is een te", 2));
+		assert_eq!(vec![0, 1], wt.select_all_str("Dit is een"));
+		wt.print_stats();
 	}
 
 	#[test]
@@ -643,12 +643,12 @@ mod tests {
 		let mut prev_wt = wt.clone();
 		for string_nr in 0..str_vec.len() {
 			let current_str = str_vec.get(string_nr).unwrap();
-			match wt.append_str_d(current_str) {
+			match wt.append_str(current_str) {
 				Ok(_) => {
-					println!("string_nr: {} - wt.len(): {}", string_nr, wt.len_d());
+					println!("string_nr: {} - wt.len(): {}", string_nr, wt.len());
 					for test_nr in 0..string_nr + 1 {
 						let string = str_vec.get(test_nr).unwrap();
-						let string_in_wt = wt.access_str_d(test_nr as u64).unwrap();
+						let string_in_wt = wt.access_str(test_nr as u64).unwrap();
 						if !(string == &string_in_wt) {
 							failed = true;
 							println!("+++\nlatest str:       [{}], line {}", current_str, string_nr + 1);
@@ -677,17 +677,17 @@ mod tests {
 		let sequence4 = DBVec::from_bytes(&[0b11000100, 0b10000000]);
 
 		// Here we create a wavelet trie from these sequences
-		let wt = WaveletTrie::from_sequences_d(&[sequence1, sequence2, sequence3, sequence4]);
+		let wt = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3, sequence4]);
 		println!("{:?}", wt);
 
 		// There should be 4 sequences in the trie now:
-		assert_eq!(4, wt.len_d());
+		assert_eq!(4, wt.len());
 
 		// Let's see at which positions prefix '001' occurs (should be 2 and 3).
 		let mut prefix_001 = DBVec::new();
 		prefix_001.push(false);
 		prefix_001.push(false);
 		prefix_001.push(true);
-		assert_eq!(vec![2, 3], wt.select_all_d(&prefix_001));
+		assert_eq!(vec![2, 3], wt.select_all(&prefix_001));
 	}
 }
