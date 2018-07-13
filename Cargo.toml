@@ -4,6 +4,4 @@ version = "0.1.0"
 authors = ["Gerald Haesendonck <gerald.haesendonck@ugent.be>"]
 
 [dependencies]
-bit-vec = "0.4"
-dyn-bit-vec = { path = '../dyn-bit-vec' }
-#dyn-bit-vec = { git = 'https://github.com/ghsnd/dyn-bit-vec' }
+dyn-bit-vec = { git = 'https://github.com/ghsnd/dyn-bit-vec' }
