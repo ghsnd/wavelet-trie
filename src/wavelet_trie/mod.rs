@@ -4,6 +4,7 @@ use self::dyn_bit_vec::DBVec;
 use std::fmt;
 use std::vec::Vec;
 use std::string::FromUtf8Error;
+use std::io::Write;
 
 // based on the paper:
 // R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
@@ -77,16 +78,61 @@ impl WaveletTrie {
 		}
 	}
 
-	pub fn print_stats(&self) {
-		println!("prefix len: {}\tpositions len: {}", self.prefix.len(), self.positions.len());
-		println!("prefix: {:?}", self.prefix);
-		println!("positions: {:?}", self.positions);
+	pub fn generate_graph(&self, out: &mut Write) {
+		self.generate_graph_internal(0, out);
+	}
+
+	fn generate_graph_internal(&self, node_nr: u64, out: &mut Write) {
+		if node_nr == 0 {
+			out.write(b"digraph wavelet_trie {\n  graph [rankdir = \"LR\"]; node [shape = \"record\"];\n").unwrap();
+		}
+
+		out.write_fmt(format_args!(" \"{}\" [label = \"{}|pref len: {}|pref spars: {}|pos len:{}|pos spars: {}\"];\n",
+			node_nr,
+			node_nr,
+			self.prefix.len(),
+			self.prefix.sparseness(),
+			self.positions.len(),
+			self.positions.sparseness()
+		)).unwrap();
+
 		if let Some(ref child) = self.left {
-			child.print_stats();
+			let child_nr = node_nr * 2 + 1;
+			child.generate_graph_internal(child_nr, out);
+			out.write_fmt(format_args!(" \"{}\" -> \"{}\"\n", node_nr, child_nr)).unwrap();
+		}
+
+		if let Some(ref child) = self.right {
+			let child_nr = node_nr * 2 + 2;
+			child.generate_graph_internal(child_nr, out);
+			out.write_fmt(format_args!(" \"{}\" -> \"{}\"\n", node_nr, child_nr)).unwrap();
+		}
+
+		if node_nr == 0 {
+			out.write(b"}\n").unwrap();
+		}
+	}
+
+	pub fn print_stats(&self) -> (u64, u64, u64) { // nr subnodes, used bits, allocated bits
+		let mut nr_subnodes = 0;
+		let mut used_bits = self.prefix.len() + self.positions.len();
+		let mut allocated_bits = self.prefix.len() / 32 * 32 + self.positions.len() / 32 * 32 + 64;
+		//println!("prefix len: {}\tpositions len: {}\tallocated bits: {}\tused bits:{}", self.prefix.len(), self.positions.len(), allocated_bits, used_bits);
+		//println!("prefix: {:?}", self.prefix);
+		//println!("positions: {:?}", self.positions);
+		if let Some(ref child) = self.left {
+			let (nn, ub, ab) = child.print_stats();
+			used_bits += ub;
+			allocated_bits += ab;
+			nr_subnodes += 1 + nn;
 		}
 		if let Some(ref child) = self.right {
-			child.print_stats();
+			let (nn, ub, ab) = child.print_stats();
+			used_bits += ub;
+			allocated_bits += ab;
+			nr_subnodes += 1 + nn;
 		}
+		(nr_subnodes, used_bits, allocated_bits)
 	}
 
 	// append a sequence to the trie at last position

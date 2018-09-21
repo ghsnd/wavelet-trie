@@ -4,6 +4,8 @@ mod tests {
 	use self::dyn_bit_vec::DBVec;
 	use wavelet_trie::WaveletTrie;
 	use std::collections::HashMap;
+	use std::io;
+	use std::io::prelude::*;
 
 	// inserts the sequences statically in a wavelet trie and checks the
 	// ranks of the sequences at the last position when inserted.
@@ -689,5 +691,16 @@ mod tests {
 		prefix_001.push(false);
 		prefix_001.push(true);
 		assert_eq!(vec![2, 3], wt.select_all(&prefix_001));
+	}
+
+	#[test]
+	fn generate_graph() {
+		let mut wt = WaveletTrie::new();
+		wt.append_str("Hello world!");
+		wt.append_str("Hello everybody!");
+
+		let stdout = io::stdout();
+		let mut out = stdout.lock();
+		wt.generate_graph(&mut out);
 	}
 }
