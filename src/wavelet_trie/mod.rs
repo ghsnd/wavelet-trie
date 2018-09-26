@@ -1,17 +1,20 @@
 extern crate dyn_bit_vec;
+extern crate serde;
+extern crate bincode;
 
 use self::dyn_bit_vec::DBVec;
 use std::fmt;
 use std::vec::Vec;
 use std::string::FromUtf8Error;
-use std::io::Write;
+use std::io::{Read, Write};
+use self::bincode::{serialize_into, deserialize_from};
 
 // based on the paper:
 // R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
 // strings are assumed prefix-free. This can be solved by appending a terminator symbol at the end of the string.
 
 // a node in the wavelet trie
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct WaveletTrie {
 	prefix: DBVec,                  // α in the literature
 	positions: DBVec,               // β in the literature
@@ -113,10 +116,10 @@ impl WaveletTrie {
 		}
 	}
 
-	pub fn print_stats(&self) -> (u64, u64, u64) { // nr subnodes, used bits, allocated bits
+	pub fn print_stats(&self) -> (usize, usize, usize) { // nr subnodes, used bits, allocated bits
 		let mut nr_subnodes = 0;
-		let mut used_bits = self.prefix.len() + self.positions.len();
-		let mut allocated_bits = self.prefix.len() / 32 * 32 + self.positions.len() / 32 * 32 + 64;
+		let mut used_bits = (self.prefix.len() + self.positions.len()) as usize;
+		let mut allocated_bits = self.prefix.allocated_bytes() * 8 + self.positions.allocated_bytes() * 8 + 64;
 		//println!("prefix len: {}\tpositions len: {}\tallocated bits: {}\tused bits:{}", self.prefix.len(), self.positions.len(), allocated_bits, used_bits);
 		//println!("prefix: {:?}", self.prefix);
 		//println!("positions: {:?}", self.positions);
@@ -565,6 +568,14 @@ impl WaveletTrie {
 				write!(f, "{})\n", indent)
 			}
 		}
+	}
+
+	pub fn serialize(&self, writer: &mut Write) -> bincode::Result<()> {
+		serialize_into(writer, self)
+	}
+
+	pub fn deserialize(reader: &mut Read) -> bincode::Result<Self> {
+		deserialize_from(reader)
 	}
 }
 
