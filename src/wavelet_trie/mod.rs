@@ -13,6 +13,87 @@ use self::bincode::{serialize_into, deserialize_from};
 // R. Grossi, G. Ottoviano "The Wavelet Trie: Maintaining an Indexed Sequence of Strings in Compressed Space"
 // strings are assumed prefix-free. This can be solved by appending a terminator symbol at the end of the string.
 
+/// **wavelet-trie**, a library that implements the wavelet trie data structure,
+/// based on the paper _The Wavelet Trie: Maintaining an Indexed Sequence of Strings in
+/// Compressed Space_ by Grossi et al ([link](https://arxiv.org/abs/1204.3581)).
+///
+/// A wavelet trie is a succinct data structure that holds a _sequence_ of binary strings
+/// (and thus also text strings, numbers, ... in short, anything that can be
+/// represented as bits or bytes). The strings have to be prefix-free, meaning
+/// that one string cannot be prefix of another, but this can be avoided by
+/// appending a terminator symbol to each string. Strings can occur multiple times.
+/// It provides efficient prefix search.
+///
+/// A wavelet trie is a generalisation of a wavelet tree: the alphabet does
+/// not need to be known in advance; it is created dynamically as strings are
+/// inserted. This implementation is dynamic in the sense that strings can be
+/// inserted and deleted at any position in the trie.
+///
+/// Situations where a wavelet trie is a good choice:
+///
+/// * many strings share prefixes;
+/// * many occurrences of the same string appear;
+/// * fast prefix or exact search is required;
+/// * the original sequence of strings needs to be reconstructed without storing the original "text"
+///
+/// **Note on this implementation:** While aiming to evolve to a good and
+/// efficient implementation, the code as it is now is a beginning. There
+/// is a lot of room for improvements.
+/// For instance, it depends heavily on bitvector operations. The underlying
+/// library is not designed for the requirements of a wavelet trie, so some
+/// operations are very slow.
+///
+/// # Examples
+///
+///
+/// A simple example with strings:
+///
+/// ```rust
+/// extern crate wavelet_trie;
+///
+///	use wavelet_trie::wavelet_trie::WaveletTrie;
+///
+/// // create a wavelet trie with two strings:
+/// let mut wt = WaveletTrie::new();
+/// wt.append_str("Hello world!");
+/// wt.append_str("Hello everybody!");
+/// 
+/// // See on which positions the strings start with "Hell"
+/// assert_eq!(vec![0, 1], wt.select_all_str("Hell"));
+/// 
+/// // get the string at position 1
+/// assert_eq!("Hello everybody!", wt.access_str(1).unwrap());
+/// ```
+///
+/// Creating a wavelet trie from 'static' binary content, and performing some queries:
+///
+/// ```rust
+/// extern crate dyn_bit_vec;
+/// extern crate wavelet_trie;
+///
+/// use dyn_bit_vec::DBVec;
+///	use wavelet_trie::wavelet_trie::WaveletTrie;
+///
+/// // We start with some binary sequences to put into the wavelet trie
+/// let sequence1 = DBVec::from_bytes(&[0b00001000]);
+/// let sequence2 = DBVec::from_bytes(&[0b10000000]);
+/// let sequence3 = DBVec::from_bytes(&[0b10000100]);
+/// let sequence4 = DBVec::from_bytes(&[0b11000100, 0b10000000]);
+///
+/// // Here we create a wavelet trie from these sequences
+/// let wt = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3, sequence4]);
+///
+/// // There should be 4 sequences in the trie now:
+/// assert_eq!(4, wt.len());
+///
+/// // Let's see at which positions prefix '001' occurs (should be 2 and 3).
+/// let mut prefix_001 = DBVec::new();
+/// prefix_001.push(false);
+/// prefix_001.push(false);
+/// prefix_001.push(true);
+/// assert_eq!(vec![2, 3], wt.select_all(&prefix_001));
+/// ```
+
 // a node in the wavelet trie
 #[derive(Clone, Serialize, Deserialize)]
 pub struct WaveletTrie {

@@ -693,6 +693,19 @@ mod tests {
 		assert_eq!(vec![2, 3], wt.select_all(&prefix_001));
 	}
 
+	fn doc_example_string() {
+		// create a wavelet trie with two strings
+		let mut wt = WaveletTrie::new();
+		wt.append_str("Hello world!");
+		wt.append_str("Hello everybody!");
+
+		// See on which positions the strings start with "Hell"
+		assert_eq!(vec![0, 1], wt.select_all_str("Hell"));
+
+		// get the string at position 1
+		assert_eq!("Hello everybody!", wt.access_str(1).unwrap());
+	}
+
 	#[test]
 	fn generate_graph() {
 		let mut wt = WaveletTrie::new();

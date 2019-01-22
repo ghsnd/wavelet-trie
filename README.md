@@ -13,6 +13,57 @@ the [tests](https://github.com/ghsnd/wavelet-trie/blob/master/src/wavelet_trie/t
 [1] Grossi, Roberto & Ottaviano, Giuseppe. (2012). _The Wavelet Trie: Maintaining an Indexed Sequence of Strings in
 Compressed Space_. Proceedings of the ACM SIGACT-SIGMOD-SIGART Symposium on Principles of Database Systems. . 10.1145/2213556.2213586.
 
+## Examples
+
+
+A simple example with strings:
+
+```rust
+extern crate wavelet_trie;
+
+use wavelet_trie::wavelet_trie::WaveletTrie;
+
+// create a wavelet trie with two strings:
+let mut wt = WaveletTrie::new();
+wt.append_str("Hello world!");
+wt.append_str("Hello everybody!");
+
+// See on which positions the strings start with "Hell"
+assert_eq!(vec![0, 1], wt.select_all_str("Hell"));
+
+// get the string at position 1
+assert_eq!("Hello everybody!", wt.access_str(1).unwrap());
+```
+
+Creating a wavelet trie from 'static' binary content, and performing some queries:
+
+```rust
+extern crate dyn_bit_vec;
+extern crate wavelet_trie;
+
+use dyn_bit_vec::DBVec;
+use wavelet_trie::wavelet_trie::WaveletTrie;
+
+// We start with some binary sequences to put into the wavelet trie
+let sequence1 = DBVec::from_bytes(&[0b00001000]);
+let sequence2 = DBVec::from_bytes(&[0b10000000]);
+let sequence3 = DBVec::from_bytes(&[0b10000100]);
+let sequence4 = DBVec::from_bytes(&[0b11000100, 0b10000000]);
+
+// Here we create a wavelet trie from these sequences
+let wt = WaveletTrie::from_sequences(&[sequence1, sequence2, sequence3, sequence4]);
+
+// There should be 4 sequences in the trie now:
+assert_eq!(4, wt.len());
+
+// Let's see at which positions prefix '001' occurs (should be 2 and 3).
+let mut prefix_001 = DBVec::new();
+prefix_001.push(false);
+prefix_001.push(false);
+prefix_001.push(true);
+assert_eq!(vec![2, 3], wt.select_all(&prefix_001));
+```
+
 ## Features at this moment
 * Dynamic: insert or delete a string at any position
 * Fast (prefix) count
