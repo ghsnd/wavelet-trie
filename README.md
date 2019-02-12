@@ -3,9 +3,9 @@
 
 A wavelet trie implementation in Rust, based on the paper by Grossi et al. [1] ([link](https://arxiv.org/abs/1204.3581)).
 
-In short, it is a succinct data structure that allows fast prefix-search on _sequences_ of binary strings.
+In short, it is a succinct data structure that allows fast exact or prefix-search on _sequences_ of binary strings.
 Note that the strings have to be prefix-free, i.e., no string can be a prefix of another. Append a terminator symbol
-to each string to avoid this problem. 
+to each string to avoid this problem. This implementation provides some methods to ease working with the `&str` type.
 
 Documentation and examples are coming up in the near future. Until then, take a look at
 the [tests](https://github.com/ghsnd/wavelet-trie/blob/master/src/wavelet_trie/tests.rs) to see how to use it.
